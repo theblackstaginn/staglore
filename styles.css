@@ -1,0 +1,114 @@
+/* =========================
+   RESET
+========================= */
+* {
+  box-sizing: border-box;
+}
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0b0b;
+  font-family: serif;
+}
+
+/* =========================
+   DESK BACKGROUND
+========================= */
+.desk {
+  position: fixed;
+  inset: 0;
+  background-image: url("./assets/desk-bg.png");
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.05) brightness(0.95);
+  z-index: 0;
+}
+
+/* =========================
+   BOOK POSITIONING
+========================= */
+.book-wrap {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+
+/* =========================
+   CLOSED BOOK
+========================= */
+.book {
+  position: relative;
+  width: min(420px, 72vw);
+  aspect-ratio: 3 / 4.5;
+  background-image: url("./assets/book-cover.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    0 40px 80px rgba(0,0,0,.85),
+    inset 0 0 0 1px rgba(255,255,255,.08);
+  transition:
+    transform 0.6s ease,
+    box-shadow 0.6s ease;
+}
+
+/* Lift on hover */
+.book:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow:
+    0 55px 110px rgba(0,0,0,.95),
+    inset 0 0 0 1px rgba(255,200,120,.25);
+}
+
+/* =========================
+   STAG EMBER EFFECT
+========================= */
+.ember-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 42%,
+      rgba(255,140,60,.25),
+      transparent 45%);
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity 0.6s ease;
+}
+
+/* Hover glow (stag sigil area) */
+.book:hover .ember-layer {
+  opacity: 1;
+  animation: emberPulse 3.5s ease-in-out infinite;
+}
+
+@keyframes emberPulse {
+  0%   { transform: scale(1);   opacity: .25; }
+  50%  { transform: scale(1.06); opacity: .45; }
+  100% { transform: scale(1);   opacity: .25; }
+}
+
+/* =========================
+   INTENTIONAL VEIL
+========================= */
+.veil {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center,
+    rgba(0,0,0,0),
+    rgba(0,0,0,.85));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s ease;
+  z-index: 5;
+}
+
+.veil.active {
+  opacity: 1;
+}
