@@ -1,41 +1,106 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Staglore</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0e0e0e">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stag Lore</title>
+  <meta name="description" content="The Black Stag Inn — Grimoire" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-  <!-- Desk world -->
-  <div class="desk"></div>
+  <!-- DESK SCENE -->
+  <main class="scene" aria-label="Desk scene">
+    <div class="desk" aria-hidden="true"></div>
 
-  <!-- Closed Grimoire -->
-  <div class="book-wrap">
-    <button class="book" aria-label="Open the grimoire">
-      <span class="ember-layer"></span>
-    </button>
-  </div>
+    <!-- The book lives IN the desk perspective space -->
+    <section class="desk-stage" aria-label="Book on desk">
+      <button id="book"
+        class="book"
+        type="button"
+        aria-label="Open the grimoire"
+        title="Open"
+      >
+        <span class="book-cover" aria-hidden="true"></span>
 
-  <!-- Intentional pause veil -->
-  <div class="veil" id="veil"></div>
+        <!-- subtle sigil focus ring / glow layer (hover only, delayed by JS 'ready') -->
+        <span class="sigil-glow" aria-hidden="true"></span>
 
-  <script>
-    const book = document.querySelector('.book');
-    const veil = document.getElementById('veil');
+        <!-- embers are generated via JS after pause beat -->
+        <span class="embers" aria-hidden="true"></span>
 
-    book.addEventListener('click', () => {
-      // Intentional pause — ritual beat
-      veil.classList.add('active');
+        <!-- accessibility text -->
+        <span class="sr-only">Open the grimoire</span>
+      </button>
+    </section>
 
-      setTimeout(() => {
-        // Later: transition to open-book reader
-        // For now this confirms the beat is intentional
-        veil.classList.remove('active');
-      }, 900);
-    });
-  </script>
+    <!-- READER OVERLAY -->
+    <section id="reader" class="reader" aria-hidden="true" aria-label="Grimoire reader">
+      <div class="reader-backdrop" data-close aria-hidden="true"></div>
+
+      <div class="reader-shell" role="dialog" aria-modal="true" aria-label="Open grimoire">
+        <header class="reader-head">
+          <div class="reader-brand">Black Stag Grimoire</div>
+
+          <div class="reader-actions">
+            <button class="rune-btn" type="button" data-close aria-label="Close grimoire">Close</button>
+          </div>
+        </header>
+
+        <!-- Open book -->
+        <div class="open-book" aria-label="Open pages">
+          <!-- Left click zone -->
+          <button class="zone zone-left" type="button" aria-label="Previous page"></button>
+          <!-- Right click zone -->
+          <button class="zone zone-right" type="button" aria-label="Next page"></button>
+
+          <div class="spine" aria-hidden="true"></div>
+
+          <article class="page page-left" aria-label="Left page">
+            <div class="page-inner">
+              <div class="page-title" id="leftTitle"></div>
+              <div class="page-body" id="leftBody"></div>
+              <div class="page-footer" id="leftFooter"></div>
+            </div>
+          </article>
+
+          <article class="page page-right" aria-label="Right page">
+            <div class="page-inner">
+              <div class="page-title" id="rightTitle"></div>
+              <div class="page-body" id="rightBody"></div>
+              <div class="page-footer" id="rightFooter"></div>
+            </div>
+
+            <!-- The flipping leaf sits above the right page -->
+            <div class="flip-leaf" id="flipLeaf" aria-hidden="true">
+              <div class="flip-front">
+                <div class="page-inner">
+                  <div class="page-title" id="flipFrontTitle"></div>
+                  <div class="page-body" id="flipFrontBody"></div>
+                  <div class="page-footer" id="flipFrontFooter"></div>
+                </div>
+              </div>
+              <div class="flip-back">
+                <div class="page-inner">
+                  <div class="page-title" id="flipBackTitle"></div>
+                  <div class="page-body" id="flipBackBody"></div>
+                  <div class="page-footer" id="flipBackFooter"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <footer class="reader-foot" aria-label="Reader footer">
+          <div class="page-indicator" id="pageIndicator">—</div>
+          <div class="hint">Click left/right side of the pages to turn.</div>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
 </body>
 </html>
