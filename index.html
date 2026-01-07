@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Staglore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e0e0e">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Desk world -->
+  <div class="desk"></div>
+
+  <!-- Closed Grimoire -->
+  <div class="book-wrap">
+    <button class="book" aria-label="Open the grimoire">
+      <span class="ember-layer"></span>
+    </button>
+  </div>
+
+  <!-- Intentional pause veil -->
+  <div class="veil" id="veil"></div>
+
+  <script>
+    const book = document.querySelector('.book');
+    const veil = document.getElementById('veil');
+
+    book.addEventListener('click', () => {
+      // Intentional pause — ritual beat
+      veil.classList.add('active');
+
+      setTimeout(() => {
+        // Later: transition to open-book reader
+        // For now this confirms the beat is intentional
+        veil.classList.remove('active');
+      }, 900);
+    });
+  </script>
+</body>
+</html>
