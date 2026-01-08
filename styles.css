@@ -1,10 +1,10 @@
 /* =========================================================
-   Stag Lore — Desk + Hot Book (Phase 1)
-   - Background: stag-study.png (the world)
+   Stag Lore — Desk + Hot Book (Phase 1) (FIXED)
+   - Background: stag-study.png (world)
    - Hot object: hot-book.png (transparent cutout)
-   - ONLY: book sitting on desk with ember glow on hover
-   - No open-book mode yet
-   - Paths are lowercase (GitHub Pages is case-sensitive)
+   - Embers canvas NEVER shows as a black rectangle:
+     it is only visible when JS adds .embers-on
+   - Hot-book alignment dials added (hotX/hotY/hotScale/hotRotate)
    ========================================================= */
 
 :root{
@@ -13,15 +13,19 @@
   /* Scene tuning */
   --sceneMax: 1200px;
 
-  /* Book placement (tweak these 3 if needed) */
+  /* Book placement (anchor position in the scene) */
   --bookLeft: 23%;
   --bookTop: 63%;
   --bookWidth: min(460px, 48vw);
 
-  /* “Sitting” illusion */
-  --tiltX: 12deg;     /* tips toward desk */
-  --tiltZ: -7deg;     /* slight rotation */
-  --lift: 0px;        /* keep 0 to avoid hovering */
+  /* Slight rotation only (NO rotateX — PNG already has perspective) */
+  --tiltZ: -7deg;
+
+  /* Hot-book calibration (to cover baked-in book perfectly) */
+  --hotX: 0px;          /* left/right */
+  --hotY: 0px;          /* up/down */
+  --hotScale: 1.00;     /* size */
+  --hotRotate: 0deg;    /* micro-rotate */
 
   /* Glow */
   --glowA: rgba(255, 168, 64, .22);
@@ -34,6 +38,7 @@
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+
 body{
   margin:0;
   background:#050608;
@@ -91,13 +96,11 @@ body{
   top:var(--bookTop);
   transform: translate(-50%, -50%);
   width: var(--bookWidth);
-  aspect-ratio: 4 / 3; /* anchor box */
+  aspect-ratio: 4 / 3;
   padding:0;
   border:0;
   background:transparent;
   cursor:pointer;
-
-  /* HARD LOCK layering so book can’t disappear */
   z-index:10;
 
   user-select:none;
@@ -111,19 +114,17 @@ body{
   top:50%;
   width: 100%;
   height:auto;
+
   transform:
     translate(-50%, -50%)
-    perspective(900px)
-    rotateX(var(--tiltX))
-    rotateZ(var(--tiltZ))
-    translateY(var(--lift));
+    translate(var(--hotX), var(--hotY))
+    rotateZ(calc(var(--tiltZ) + var(--hotRotate)))
+    scale(var(--hotScale));
+
   transform-origin: 50% 62%;
   display:block;
 
-  /* Depth + seating */
   filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
-
-  /* no accidental dragging */
   pointer-events:none;
 }
 
@@ -146,7 +147,7 @@ body{
   pointer-events:none;
 }
 
-/* Contact shadow (tight) — THIS kills “hovering” */
+/* Contact shadow (tight) — kills hovering */
 .shadow-contact{
   position:absolute;
   left:50%;
@@ -165,7 +166,7 @@ body{
   pointer-events:none;
 }
 
-/* Embers canvas sits above book */
+/* Embers canvas sits above book — INVISIBLE unless JS enables */
 .embers{
   position:absolute;
   inset:0;
@@ -173,8 +174,15 @@ body{
   height:100%;
   z-index:12;
   pointer-events:none;
+
   opacity:0;
-  transition: opacity .22s ease;
+  background: transparent;
+  transition: opacity .18s ease;
+}
+
+/* Only show canvas when JS says so */
+.book-anchor.embers-on .embers{
+  opacity:1;
 }
 
 /* Optional hint text */
@@ -191,12 +199,7 @@ body{
   pointer-events:none;
 }
 
-/* Hover / focus: intentional “ritual wake” */
-.book-anchor:hover .embers,
-.book-anchor:focus-visible .embers{
-  opacity:1;
-}
-
+/* Hover / focus glow (book only; canvas visibility handled by JS) */
 .book-anchor:hover .book,
 .book-anchor:focus-visible .book{
   filter:
@@ -207,7 +210,7 @@ body{
 
 .book-anchor:hover .shadow-contact,
 .book-anchor:focus-visible .shadow-contact{
-  opacity: .98; /* slightly stronger so it still feels grounded */
+  opacity: .98;
 }
 
 .book-anchor:focus-visible{
@@ -236,7 +239,6 @@ body{
     --bookLeft: 36%;
     --bookTop: 66%;
     --bookWidth: min(420px, 78vw);
-    --tiltX: 10deg;
     --tiltZ: -6deg;
   }
   body{ overflow:hidden; }
