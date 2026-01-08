@@ -68,8 +68,8 @@ const spawnOffset = {
     nx = Math.min(0.98, Math.max(0.02, nx));
     ny = Math.min(0.98, Math.max(0.02, ny));
 
-    const x = nx * w;
-    const y = ny * h;
+    const x = (spawnOffset.x0 + nx * (spawnOffset.x1 - spawnOffset.x0)) * w;
+    const y = (spawnOffset.y0 + ny * (spawnOffset.y1 - spawnOffset.y0)) * h;
 
     // Ember motion
     const vx = (Math.random() - 0.5) * 0.15;
