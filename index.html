@@ -3,43 +3,52 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Stag Lore — Desk Grimoire</title>
+  <title>Stag Lore</title>
+  <meta name="description" content="The Black Stag Inn — Grimoire." />
 
+  <!-- Preload key images for faster first paint -->
   <link rel="preload" as="image" href="./assets/desk-bg.png">
-  <link rel="preload" as="image" href="./assets/book-frame_01.PNG">
+  <link rel="preload" as="image" href="./assets/book-frame_01.png">
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-  <!-- Fixed desk background -->
+  <!-- Fixed background -->
   <div class="bg" aria-hidden="true"></div>
+
+  <!-- Film / dust / subtle vignette -->
   <div class="atmos" aria-hidden="true"></div>
 
-  <main class="stage" aria-label="Desk with grimoire">
-    <!-- Book anchor (positions book on desk plane) -->
-    <button class="book-anchor" id="bookBtn" type="button" aria-label="Pick up the grimoire">
-      <!-- Shadows that pin it to the desk -->
-      <span class="shadow-contact" aria-hidden="true"></span>
-      <span class="shadow-ambient" aria-hidden="true"></span>
+  <main class="stage" role="main" aria-label="Stag Lore desk">
+    <section class="desk-scene" aria-label="Desk scene">
 
-      <!-- Embers container (particles injected by JS) -->
-      <span class="embers" id="embers" aria-hidden="true"></span>
+      <!-- The clickable / hoverable "book on desk" -->
+      <button class="book-anchor" id="bookAnchor" type="button" aria-label="Ancient grimoire with stag sigil">
+        <!-- Grounding shadows -->
+        <span class="shadow-ambient" aria-hidden="true"></span>
+        <span class="shadow-contact" aria-hidden="true"></span>
 
-      <!-- The locked book image -->
-      <img
-        class="book"
-        id="book"
-        src="./assets/book-frame_01.PNG"
-        alt="Antique grimoire with stag sigil"
-        draggable="false"
-      />
+        <!-- Book itself -->
+        <img
+          class="book"
+          id="bookImg"
+          src="./assets/book-frame_01.png"
+          alt="Antique grimoire with stag sigil"
+          draggable="false"
+          loading="eager"
+        />
 
-      <!-- Intentional, subtle hint (only shows after hover beat completes) -->
-      <span class="hint" id="hint" aria-hidden="true">CLICK</span>
-    </button>
+        <!-- Ember canvas (only active on hover/focus) -->
+        <canvas class="embers" id="embers" aria-hidden="true"></canvas>
+
+        <!-- Subtle prompt (optional; remove if you want it silent) -->
+        <span class="book-hint" aria-hidden="true">CLICK</span>
+      </button>
+
+    </section>
   </main>
 
-  <script src="./script.js"></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>
