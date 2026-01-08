@@ -10,6 +10,14 @@
   const sparks = [];
   const MAX = 80;
 
+// region inside the expanded canvas where we want the 7-shape to appear
+const spawnOffset = {
+  x0: 0.10,  // left inset (10%)
+  x1: 0.90,  // right inset (90%)
+  y0: 0.00,  // top inset (0%)
+  y1: 0.60   // bottom inset (60% down the book)
+};
+
   function rand(min, max) {
     return Math.random() * (max - min) + min;
   }
