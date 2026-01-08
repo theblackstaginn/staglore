@@ -12,63 +12,65 @@
   /* Book placement within the scene box
      (percentage of .scene-inner width/height) */
   --bookX: 55.5%;   /* horizontal position (0–100) */
-  --bookY: 45.5%;   /* vertical position   (0–100) */
-  --bookWidth: 29%; /* width as % of scene width   */
+  --bookY: 45.5%;   /* vertical position (0–100) */
+  --bookWidth: 29%; /* width as % of scene width */
 
-  /* Ember glow color (cool blue for contrast) */
-  --emberOuter: rgba(134, 202, 255, 0.55);
-  --emberInner: rgba(214, 242, 255, 0.85);
+  /* Glow (cold blue) */
+  --glowA: rgba(140,205,255,.32);
+  --glowB: rgba(120,180,255,.18);
 
-  /* Vignette */
+  /* Vignette strength */
   --v1: .08;
   --v2: .58;
 }
 
-*,
-*::before,
-*::after{
-  box-sizing:border-box;
-}
+/* Basic reset */
+*{ box-sizing:border-box; }
 
-html,body{
+html, body{
   height:100%;
   margin:0;
+  padding:0;
 }
 
 body{
   background:var(--bg-dark);
   color:var(--text);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
-  overflow:hidden;
 }
 
 /* =========================
-   SCENE
+   SCENE LAYOUT
    ========================= */
 
 .scene{
-  height:100vh;
-  width:100%;
+  min-height:100vh;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
+  background:#050608;
 }
 
 .scene-inner{
   position:relative;
-  width:min(1200px, 100vw);
-  margin:0 auto;
+  width:100%;
+  max-width:1536px;      /* native image width */
+  aspect-ratio:3 / 2;    /* 1536 x 1024 */
+  margin:auto;
+  overflow:hidden;
 }
 
 /* Background image */
 .scene-bg{
-  display:block;
+  position:absolute;
+  inset:0;
   width:100%;
-  height:auto;
-  pointer-events:none;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
 
-/* Soft vignette overlay */
+/* Atmosphere overlay */
 .scene-inner::after{
   content:"";
   position:absolute;
@@ -79,6 +81,7 @@ body{
     radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,var(--v2)) 100%),
     linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
   mix-blend-mode:normal;
+  z-index:1;
 }
 
 /* =========================
@@ -91,97 +94,93 @@ body{
   top:var(--bookY);
   transform:translate(-50%, -50%);
   width:var(--bookWidth);
+  max-width:40vw;
   padding:0;
   border:0;
   background:transparent;
   cursor:pointer;
-  z-index:10;
+  z-index:5;
+  overflow:visible; /* allow embers to flare slightly past edges */
   user-select:none;
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Hot book image */
+/* Book image */
 .book-img{
+  position:relative;
   display:block;
   width:100%;
   height:auto;
+  filter:drop-shadow(0 18px 26px rgba(0,0,0,.55));
   pointer-events:none;
-  filter:
-    drop-shadow(0 18px 26px rgba(0,0,0,.55));
 }
 
-/* Ambient shadow (broad) */
+/* Ambient shadow (broad, soft) */
 .shadow-ambient{
   position:absolute;
   left:50%;
-  top:73%;
-  width:86%;
+  top:78%;
+  width:78%;
   height:26%;
   transform:translate(-50%, -50%);
   border-radius:50%;
   background:radial-gradient(circle at 50% 50%,
-    rgba(0,0,0,.32),
+    rgba(0,0,0,.34),
     rgba(0,0,0,0) 70%
   );
-  filter:blur(12px);
-  opacity:.68;
+  filter:blur(10px);
+  opacity:.7;
+  z-index:3;
   pointer-events:none;
-  z-index:0;
 }
 
 /* Contact shadow (tight) */
 .shadow-contact{
   position:absolute;
   left:50%;
-  top:77%;
-  width:78%;
+  top:82%;
+  width:70%;
   height:18%;
   transform:translate(-50%, -50%);
   border-radius:50%;
   background:radial-gradient(circle at 50% 55%,
-    rgba(0,0,0,.50),
-    rgba(0,0,0,0) 65%
+    rgba(0,0,0,.55),
+    rgba(0,0,0,0) 68%
   );
   filter:blur(6px);
   opacity:.96;
+  z-index:4;
   pointer-events:none;
-  z-index:0;
 }
 
-/* =========================
-   EMBERS CANVAS — top + right edge only
-   ========================= */
-
+/* Embers canvas: full overlay, transparent */
 .embers{
   position:absolute;
-  /* this rectangle hugs the top + right of the book */
-  left:56%;          /* start a bit right of center of book */
-  top:0%;
-  width:44%;        /* right portion of book */
-  height:56%;       /* top portion of book */
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:6;
   pointer-events:none;
+  background:transparent !important;
   opacity:0;
-  background: transparent !important;
-  z-index:20;
-  overflow:visible;
   transition:opacity .22s ease;
 }
 
-/* Hint text (optional) */
+/* Optional hint */
 .book-hint{
   position:absolute;
   left:50%;
-  top:97%;
+  top:96%;
   transform:translate(-50%, -50%);
   font-size:11px;
-  letter-spacing:.28em;
+  letter-spacing:.26em;
   opacity:.42;
   text-transform:uppercase;
+  z-index:7;
   pointer-events:none;
-  z-index:25;
 }
 
-/* Hover / focus: activate embers + glow */
+/* Hover / focus: wake the magic */
 .book-anchor:hover .embers,
 .book-anchor:focus-visible .embers{
   opacity:1;
@@ -190,21 +189,27 @@ body{
 .book-anchor:hover .book-img,
 .book-anchor:focus-visible .book-img{
   filter:
-    drop-shadow(0 18px 26px rgba(0,0,0,.60))
-    drop-shadow(0 0 32px rgba(134,202,255,.40))
-    drop-shadow(0 0 72px rgba(134,202,255,.25));
+    drop-shadow(0 18px 26px rgba(0,0,0,.56))
+    drop-shadow(0 0 22px var(--glowA))
+    drop-shadow(0 0 46px var(--glowB));
 }
 
 .book-anchor:focus-visible{
-  outline:2px solid rgba(134,202,255,.45);
+  outline:2px solid rgba(160,215,255,.4);
   outline-offset:8px;
+  border-radius:18px;
 }
 
-/* Small screens: keep everything on screen */
-@media (max-width: 760px){
+/* Reduced motion: just show static glow */
+@media (prefers-reduced-motion:reduce){
+  .embers{ transition:none; }
+}
+
+/* Small screens: minor placement tweak if needed */
+@media (max-width:760px){
   :root{
-    --bookX: 55%;
-    --bookY: 50%;
-    --bookWidth: 62%;
+    --bookX:55.5%;
+    --bookY:47%;
+    --bookWidth:54%;
   }
 }
