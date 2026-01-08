@@ -155,6 +155,7 @@ body{
   pointer-events:none;
   opacity:0;
   transition: opacity .22s ease;
+  background: transparent;   /* <-- make sure this is here, no color */
 }
 
 /* Hint text */
