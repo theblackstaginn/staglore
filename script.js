@@ -27,39 +27,51 @@
   }
 
   function spawnOne() {
-    const r = Math.random();
+  const r = Math.random();
 
-    // Two source bands:
-    // - Right page edge (vertical strip)
-    // - Top edge (horizontal strip)
-    let x, y, vx, vy;
+  // We want:
+  // - A tight vertical band hugging the RIGHT PAGE EDGE / side pages
+  // - A thin horizontal band just ABOVE the TOP EDGE
+  let x, y, vx, vy;
 
-    if (r < 0.55) {
-      // RIGHT EDGE band
-      x  = rand(w * 0.70, w * 0.96);
-      y  = rand(h * 0.22, h * 0.88);
-      vx = rand(0.05, 0.22);   // drift outward
-      vy = rand(-0.65, -0.25); // rise
-    } else {
-      // TOP EDGE band
-      x  = rand(w * 0.22, w * 0.86);
-      y  = rand(h * 0.08, h * 0.22);
-      vx = rand(-0.12, 0.12);
-      vy = rand(-0.55, -0.18);
-    }
+  if (r < 0.6) {
+    // ======================================
+    // RIGHT EDGE band (side pages / rim)
+    // ======================================
+    // x: from ~86% of book width to a little off the right edge
+    x  = rand(w * 0.86, w * 1.04);
+    // y: mostly along the right side of the book, not way below the base
+    y  = rand(h * 0.32, h * 0.88);
 
-    sparks.push({
-      x, y,
-      vx, vy,
-      r: rand(0.8, 2.2),
-      a: rand(0.4, 0.9),
-      life: rand(32, 70),
-      t: 0,
-      tw: rand(0.004, 0.012)
-    });
+    // Drift outward and upward
+    vx = rand(0.03, 0.12);    // gentle push away from the book
+    vy = rand(-0.60, -0.22);  // rise
+  } else {
+    // ======================================
+    // TOP EDGE band (just above the cover)
+    // ======================================
+    // x: span across the top 60–70% of the cover
+    x  = rand(w * 0.22, w * 0.78);
+    // y: very close to the top edge, slightly above it
+    y  = rand(h * 0.02, h * 0.11);
 
-    if (sparks.length > MAX) sparks.shift();
+    // Rise with a little side wobble
+    vx = rand(-0.10, 0.10);
+    vy = rand(-0.55, -0.20);
   }
+
+  sparks.push({
+    x, y,
+    vx, vy,
+    r: rand(0.8, 2.2),
+    a: rand(0.4, 0.9),
+    life: rand(32, 70),
+    t: 0,
+    tw: rand(0.004, 0.012)
+  });
+
+  if (sparks.length > MAX) sparks.shift();
+}
 
   function step() {
     raf = requestAnimationFrame(step);
