@@ -1,98 +1,138 @@
 /* =========================================================
-   Stag Lore — Desk Grimoire (CLOSED BOOK ONLY)
-   - Embers on hover/focus
-   - “Armed” state after intentional hover beat
-   - Click triggers a pickup micro-lift (no reader yet)
+   Stag Lore — Embers (Phase 1)
+   - Only runs while hovered/focused
+   - Canvas sized to the book anchor
    ========================================================= */
 
-const bookBtn = document.getElementById("bookBtn");
-const embers = document.getElementById("embers");
+(() => {
+  const anchor = document.getElementById("bookAnchor");
+  const canvas = document.getElementById("embers");
+  const ctx = canvas.getContext("2d", { alpha: true });
 
-let emberTimer = null;
-let armTimer = null;
+  let w = 0, h = 0, dpr = 1;
+  let running = false;
+  let raf = 0;
 
-const HOVER_BEAT_MS = 520;  // intentional pause so it never looks like lag
-const PICKUP_BEAT_MS = 520; // pickup motion length
+  const sparks = [];
+  const MAX = 56;
 
-function spawnEmber(){
-  const e = document.createElement("span");
-  e.className = "ember";
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    w = Math.max(1, Math.floor(rect.width));
+    h = Math.max(1, Math.floor(rect.height));
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
 
-  // Spawn region around the book’s lower half
-  const x = 18 + Math.random() * 64; // %
-  const y = 52 + Math.random() * 30; // %
+  function rand(min, max) {
+    return Math.random() * (max - min) + min;
+  }
 
-  const dx = (Math.random() * 56 - 28).toFixed(0) + "px";
-  const lift = (70 + Math.random() * 110).toFixed(0) + "px";
-  const dur = (1200 + Math.random() * 900).toFixed(0) + "ms";
+  function spawn() {
+    // Spawn from lower-middle area, drift upward
+    const x = rand(w * 0.38, w * 0.62);
+    const y = rand(h * 0.62, h * 0.78);
 
-  e.style.left = x + "%";
-  e.style.top = y + "%";
-  e.style.setProperty("--dx", dx);
-  e.style.setProperty("--lift", lift);
-  e.style.setProperty("--dur", dur);
-  e.style.setProperty("--x", (Math.random() * 10 - 5).toFixed(0) + "px");
-  e.style.setProperty("--y", (Math.random() * 10 - 5).toFixed(0) + "px");
+    const s = {
+      x, y,
+      vx: rand(-0.18, 0.18),
+      vy: rand(-0.85, -0.35),
+      r: rand(0.8, 2.2),
+      a: rand(0.35, 0.78),
+      life: rand(28, 64),
+      t: 0,
+      tw: rand(0.004, 0.012) // twinkle
+    };
+    sparks.push(s);
+    if (sparks.length > MAX) sparks.shift();
+  }
 
-  embers.appendChild(e);
-  window.setTimeout(() => e.remove(), parseInt(dur, 10) + 200);
-}
+  function step() {
+    raf = requestAnimationFrame(step);
 
-function startEmbers(){
-  if (emberTimer) return;
-  emberTimer = window.setInterval(() => {
-    spawnEmber();
-    if (Math.random() > 0.65) spawnEmber();
-  }, 170);
-}
+    // Clear with slight fade for trails
+    ctx.fillStyle = "rgba(0,0,0,0.12)";
+    ctx.fillRect(0, 0, w, h);
 
-function stopEmbers(){
-  if (!emberTimer) return;
-  window.clearInterval(emberTimer);
-  emberTimer = null;
-}
+    // Spawn a few per frame
+    const spawns = 2;
+    for (let i = 0; i < spawns; i++) spawn();
 
-function armAfterBeat(){
-  clearTimeout(armTimer);
-  bookBtn.classList.remove("armed");
-  armTimer = window.setTimeout(() => {
-    bookBtn.classList.add("armed");
-  }, HOVER_BEAT_MS);
-}
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.t++;
 
-function disarm(){
-  clearTimeout(armTimer);
-  bookBtn.classList.remove("armed");
-}
+      // Drift + gentle swirl
+      s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.08;
+      s.y += s.vy;
 
-bookBtn.addEventListener("mouseenter", () => {
-  startEmbers();
-  armAfterBeat();
-});
-bookBtn.addEventListener("mouseleave", () => {
-  stopEmbers();
-  disarm();
-  bookBtn.classList.remove("picking");
-});
-bookBtn.addEventListener("focus", () => {
-  startEmbers();
-  armAfterBeat();
-});
-bookBtn.addEventListener("blur", () => {
-  stopEmbers();
-  disarm();
-  bookBtn.classList.remove("picking");
-});
+      // Fade out
+      const p = s.t / s.life;
+      const alpha = s.a * (1 - p);
 
-bookBtn.addEventListener("click", (e) => {
-  e.preventDefault();
+      // Twinkle brightness
+      const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
 
-  // If they click before armed, we still honor the ritual beat:
-  // arm immediately, then run pickup.
-  bookBtn.classList.add("armed");
+      // Draw ember
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
 
-  bookBtn.classList.add("picking");
-  window.setTimeout(() => {
-    bookBtn.classList.remove("picking");
-  }, PICKUP_BEAT_MS);
-});
+      // Warm ember palette (no hard-coded CSS vars here; keep it simple)
+      ctx.fillStyle = `rgba(255, 165, 80, ${alpha * tw})`;
+      ctx.fill();
+
+      // Tiny hot core sometimes
+      if (Math.random() < 0.22) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, Math.max(0.4, s.r * 0.42), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 220, 170, ${alpha * 0.65})`;
+        ctx.fill();
+      }
+
+      // Remove dead
+      if (s.t >= s.life || s.y < -10 || s.x < -20 || s.x > w + 20) {
+        sparks.splice(i, 1);
+      }
+    }
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    resize();
+    ctx.clearRect(0, 0, w, h);
+    sparks.length = 0;
+    cancelAnimationFrame(raf);
+    step();
+  }
+
+  function stop() {
+    running = false;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    // Clear after a beat so it doesn’t “pop” harshly
+    setTimeout(() => {
+      if (!running) ctx.clearRect(0, 0, w, h);
+    }, 120);
+  }
+
+  // Click placeholder (no open-book mode yet)
+  anchor.addEventListener("click", () => {
+    // Intentional beat without “lag”:
+    anchor.classList.add("clicked");
+    setTimeout(() => anchor.classList.remove("clicked"), 240);
+  });
+
+  // Start/stop on hover + keyboard focus
+  anchor.addEventListener("mouseenter", start);
+  anchor.addEventListener("mouseleave", stop);
+  anchor.addEventListener("focusin", start);
+  anchor.addEventListener("focusout", stop);
+
+  // Resize safety
+  window.addEventListener("resize", () => {
+    if (running) resize();
+  }, { passive: true });
+})();
