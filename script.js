@@ -1,12 +1,14 @@
 /* =========================================================
-   Stag Lore — Embers (right page edge + top edge)
-   - Canvas sized to the book anchor
-   - Transparent background (no black rectangle)
+   Stag Lore — Realistic violet embers at page seam
+   - Emits from right page edge + top bevel
+   - No black box (canvas stays transparent)
    ========================================================= */
 
 (() => {
   const anchor = document.getElementById("bookAnchor");
   const canvas = document.getElementById("embers");
+  if (!anchor || !canvas) return;
+
   const ctx = canvas.getContext("2d", { alpha: true });
 
   let w = 0, h = 0, dpr = 1;
@@ -14,7 +16,7 @@
   let raf = 0;
 
   const sparks = [];
-  const MAX = 56;
+  const MAX = 60;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -31,35 +33,36 @@
   }
 
   function spawn() {
-    // Two “emitters”:
-    //  - right page edge (main)
-    //  - top edge (occasional)
+    // 0–0.75  = right page seam
+    // 0.75–1 = top bevel edge
     const region = Math.random();
 
     let x, y, vx, vy;
 
     if (region < 0.75) {
-      // 🔥 Right page edge: narrow vertical band on the right side
-      x  = rand(w * 0.72, w * 0.88);
-      y  = rand(h * 0.32, h * 0.78);
-      vx = rand(-0.4, 0.05);   // drift slightly left/outward
-      vy = rand(-0.85, -0.35); // rise
+      // ===== RIGHT PAGE EDGE =====
+      // Nudged slightly NE (further right & higher)
+      x  = rand(w * 0.72, w * 0.86);
+      y  = rand(h * 0.26, h * 0.52);
+      vx = rand(-0.12, 0.02);
+      vy = rand(-0.55, -0.30);
     } else {
-      // 🔥 Top edge: thin band across upper part of the book
-      x  = rand(w * 0.40, w * 0.82);
-      y  = rand(h * 0.16, h * 0.30);
-      vx = rand(-0.15, 0.15);
-      vy = rand(-0.75, -0.25);
+      // ===== TOP BEVEL EDGE =====
+      x  = rand(w * 0.40, w * 0.80);
+      y  = rand(h * 0.10, h * 0.22);
+      vx = rand(-0.18, 0.18);
+      vy = rand(-0.65, -0.32);
     }
 
     const s = {
       x, y,
-      vx, vy,
-      r: rand(0.8, 2.2),
-      a: rand(0.35, 0.78),
-      life: rand(28, 64),
+      vx,
+      vy,
+      r: rand(0.9, 1.8),
+      a: rand(0.45, 0.9),
+      life: rand(32, 72),
       t: 0,
-      tw: rand(0.004, 0.012) // twinkle
+      tw: rand(0.004, 0.010) // twinkle speed
     };
 
     sparks.push(s);
@@ -69,45 +72,51 @@
   function step() {
     raf = requestAnimationFrame(step);
 
-    // HARD CLEAR: keep canvas transparent, no accumulating black box
+    // IMPORTANT: no black fill — keep canvas transparent
     ctx.clearRect(0, 0, w, h);
 
     // Spawn a couple per frame
-    const spawns = 2;
-    for (let i = 0; i < spawns; i++) spawn();
+    for (let i = 0; i < 2; i++) spawn();
 
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
       s.t++;
 
-      // Drift + gentle swirl
-      s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.08;
-      s.y += s.vy;
+      // Slight swirl + upward drift
+      s.x += s.vx + Math.sin((s.t * 0.07) + s.x * 0.01) * 0.05;
+      s.y += s.vy + 0.01; // tiny "gravity" so they arc
 
       const p = s.t / s.life;
-      const alpha = s.a * (1 - p);
-
-      // Twinkle brightness
+      const alpha = s.a * (1 - p);     // fades over life
       const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
 
-      // Draw ember
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-
-      // Warm ember palette
-      ctx.fillStyle = `rgba(255, 165, 80, ${alpha * tw})`;
-      ctx.fill();
-
-      // Occasional hotter core
-      if (Math.random() < 0.22) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, Math.max(0.4, s.r * 0.42), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 220, 170, ${alpha * 0.65})`;
-        ctx.fill();
+      if (alpha <= 0) {
+        sparks.splice(i, 1);
+        continue;
       }
 
-      // Cull dead sparks
-      if (s.t >= s.life || s.y < -10 || s.x < -20 || s.x > w + 20) {
+      // ===== Realistic violet ember (core + halo) =====
+      const coreAlpha = alpha * tw;
+      const haloAlpha = alpha * 0.35;
+
+      const radius = s.r * 3;
+      const g = ctx.createRadialGradient(
+        s.x, s.y, 0,
+        s.x, s.y, radius
+      );
+
+      // center: near-white violet
+      g.addColorStop(0.0, `rgba(237, 230, 255, ${coreAlpha})`);
+      // mid halo: soft violet
+      g.addColorStop(0.4, `rgba(178, 158, 255, ${haloAlpha})`);
+      // edge: fully transparent
+      g.addColorStop(1.0, `rgba(20, 10, 40, 0)`);
+
+      ctx.fillStyle = g;
+      ctx.fillRect(s.x - radius, s.y - radius, radius * 2, radius * 2);
+
+      // Kill if off-canvas or past life
+      if (s.t >= s.life || s.y < -20 || s.x < -30 || s.x > w + 30) {
         sparks.splice(i, 1);
       }
     }
@@ -132,20 +141,21 @@
     }, 120);
   }
 
-  // Click placeholder (until open-book mode exists)
+  // Click placeholder (for future open-book mode)
   anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
   });
 
-  // Start/stop on hover + keyboard focus
+  // Start / stop on hover + focus
   anchor.addEventListener("mouseenter", start);
   anchor.addEventListener("mouseleave", stop);
   anchor.addEventListener("focusin", start);
   anchor.addEventListener("focusout", stop);
 
-  // Resize safety
-  window.addEventListener("resize", () => {
-    if (running) resize();
-  }, { passive: true });
+  window.addEventListener(
+    "resize",
+    () => { if (running) resize(); },
+    { passive: true }
+  );
 })();
