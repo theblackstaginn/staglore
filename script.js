@@ -40,14 +40,16 @@
 
     if (r < 0.55) {
       // RIGHT EDGE band (vertical)
-      x  = rand(w * 0.70, w * 0.96);
-      y  = rand(h * 0.22, h * 0.88);
+      // Canvas is slightly bigger than the book, so the "page"
+      // sits roughly in the central 88% width and 84% height.
+      x  = rand(w * 0.68, w * 0.93);
+      y  = rand(h * 0.22, h * 0.84);
       vx = rand(0.05, 0.22);   // drifts slightly outward
       vy = rand(-0.65, -0.25); // rises
     } else {
       // TOP EDGE band (horizontal)
-      x  = rand(w * 0.22, w * 0.86);
-      y  = rand(h * 0.08, h * 0.22);
+      x  = rand(w * 0.28, w * 0.82);
+      y  = rand(h * 0.12, h * 0.26);
       vx = rand(-0.12, 0.12);
       vy = rand(-0.55, -0.18);
     }
@@ -109,7 +111,7 @@
       }
 
       // Kill once off-screen or out of life
-      if (s.t >= s.life || s.y < -12 || s.x < -12 || s.x > w + 12) {
+      if (s.t >= s.life || s.y < -12 || s.x < -18 || s.x > w + 18) {
         sparks.splice(i, 1);
       }
     }
