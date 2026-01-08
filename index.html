@@ -6,6 +6,7 @@
   <title>Stag Lore</title>
   <meta name="description" content="The Black Stag Inn — Grimoire." />
 
+  <!-- Preload key images -->
   <link rel="preload" as="image" href="./assets/stag-study.png">
   <link rel="preload" as="image" href="./assets/hot-book.png">
 
@@ -13,12 +14,18 @@
 </head>
 
 <body>
-  <!-- Background + atmos -->
-  <div class="bg" aria-hidden="true"></div>
-  <div class="atmos" aria-hidden="true"></div>
+  <main class="scene" role="main" aria-label="Stag Lore desk">
+    <div class="scene-inner">
 
-  <main class="stage" role="main" aria-label="Stag Lore desk">
-    <section class="desk-scene" aria-label="Desk scene">
+      <!-- Background image is now a real DOM element -->
+      <img
+        src="./assets/stag-study.png"
+        alt="Wizard's study with books, candle and alchemy tools"
+        class="scene-bg"
+        draggable="false"
+      />
+
+      <!-- Atmosphere overlay comes from CSS ::after -->
 
       <!-- Hot / interactive book overlay -->
       <button
@@ -27,27 +34,31 @@
         type="button"
         aria-label="Ancient grimoire with stag sigil"
       >
+        <!-- Shadows to ground the book -->
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
+        <!-- Transparent cutout of the book on stand -->
         <img
           id="bookImg"
-          class="book"
+          class="book-img"
           src="./assets/hot-book.png"
-          alt="Antique grimoire with stag sigil"
+          alt=""
           draggable="false"
         />
 
+        <!-- Ember canvas -->
         <canvas
           id="embers"
           class="embers"
           aria-hidden="true">
         </canvas>
 
+        <!-- Optional hint -->
         <span class="book-hint" aria-hidden="true">CLICK</span>
       </button>
 
-    </section>
+    </div>
   </main>
 
   <script src="./script.js" defer></script>
