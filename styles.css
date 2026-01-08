@@ -161,7 +161,7 @@ body{
   height:56%;       /* top portion of book */
   pointer-events:none;
   opacity:0;
-  background:transparent !important;
+  background: transparent !important;
   z-index:20;
   overflow:visible;
   transition:opacity .22s ease;
