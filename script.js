@@ -1,7 +1,8 @@
 /* =========================================================
-   Stag Lore — Embers (Pages + Top Edge)
-   - Canvas stays fully transparent (no black / grey box)
-   - Embers spawn along the right-page edge and top edge
+   Stag Lore — Embers (Top + Right Plume, no panel)
+   - Canvas stays fully transparent
+   - Embers spawn along the right-page edge & top edge
+   - Extra "plume" area above the top-right corner
    ========================================================= */
 
 (() => {
@@ -33,30 +34,39 @@
   function spawnOne() {
     const r = Math.random();
 
-    // We want embers from:
-    // - Right-page edge band
-    // - Top edge band
+    // We’ll use three bands:
+    // 1) tight RIGHT EDGE band (pages)
+    // 2) tight TOP EDGE band
+    // 3) PLUME above the top-right (free-floating glow)
+
     let x, y, vx, vy;
 
-    if (r < 0.55) {
-      // RIGHT EDGE band (vertical)
-      // Canvas is slightly bigger than the book, so the "page"
-      // sits roughly in the central 88% width and 84% height.
-      x  = rand(w * 0.68, w * 0.93);
-      y  = rand(h * 0.22, h * 0.84);
-      vx = rand(0.05, 0.22);   // drifts slightly outward
-      vy = rand(-0.65, -0.25); // rises
+    if (r < 0.5) {
+      // 1) RIGHT EDGE: thin vertical strip along the page edge
+      x  = rand(w * 0.82, w * 0.99);
+      y  = rand(h * 0.18, h * 0.88);
+      vx = rand(0.02, 0.16);    // slight outward drift
+      vy = rand(-0.70, -0.30);  // rises up
+    } else if (r < 0.8) {
+      // 2) TOP EDGE: thin horizontal strip along the top of the cover
+      x  = rand(w * 0.18, w * 0.88);
+      y  = rand(h * 0.06, h * 0.16);
+      vx = rand(-0.10, 0.10);
+      vy = rand(-0.60, -0.24);
     } else {
-      // TOP EDGE band (horizontal)
-      x  = rand(w * 0.28, w * 0.82);
-      y  = rand(h * 0.12, h * 0.26);
-      vx = rand(-0.12, 0.12);
-      vy = rand(-0.55, -0.18);
+      // 3) PLUME: above & to the right of the book
+      //    This makes that cloud you drew on the sticky note
+      x  = rand(w * 0.60, w * 0.98);
+      y  = rand(h * -0.05, h * 0.45); // includes a bit above the top edge
+      vx = rand(-0.06, 0.10);
+      vy = rand(-0.45, -0.18);
     }
 
     sparks.push({
-      x, y,
-      vx, vy,
+      x,
+      y,
+      vx,
+      vy,
       r: rand(0.8, 2.2),
       a: rand(0.4, 0.9),
       life: rand(32, 70),
@@ -70,7 +80,7 @@
   function step() {
     raf = requestAnimationFrame(step);
 
-    // FULLY TRANSPARENT CLEAR — no panel
+    // *** Transparent clear — absolutely no fill panel ***
     ctx.clearRect(0, 0, w, h);
 
     // Spawn a few per frame
@@ -87,16 +97,15 @@
 
       const p = s.t / s.life;
       const alpha = s.a * (1 - p);
-
       const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
-
       const aFinal = alpha * tw;
+
       if (aFinal <= 0) {
         sparks.splice(i, 1);
         continue;
       }
 
-      // Outer ember (cooler blue glow)
+      // Outer ember (cool blue glow)
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
@@ -105,13 +114,19 @@
       // Hotter core
       if (Math.random() < 0.30) {
         ctx.beginPath();
-        ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
+        ctx.arc(
+          s.x,
+          s.y,
+          Math.max(0.5, s.r * 0.45),
+          0,
+          Math.PI * 2
+        );
         ctx.fillStyle = `rgba(200, 235, 255, ${aFinal * 0.7})`;
         ctx.fill();
       }
 
       // Kill once off-screen or out of life
-      if (s.t >= s.life || s.y < -12 || s.x < -18 || s.x > w + 18) {
+      if (s.t >= s.life || s.y < -20 || s.x < -20 || s.x > w + 20) {
         sparks.splice(i, 1);
       }
     }
@@ -136,7 +151,7 @@
     }, 120);
   }
 
-  // Click placeholder (for future open-book magic)
+  // Click placeholder (for future open-book mode)
   anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
@@ -147,7 +162,11 @@
   anchor.addEventListener("focusin", start);
   anchor.addEventListener("focusout", stop);
 
-  window.addEventListener("resize", () => {
-    if (running) resize();
-  }, { passive: true });
+  window.addEventListener(
+    "resize",
+    () => {
+      if (running) resize();
+    },
+    { passive: true }
+  );
 })();
