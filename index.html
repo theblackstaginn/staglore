@@ -1,31 +1,35 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Stag Lore</title>
+/* LOCK THE VIEWPORT — no scroll, black frame */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000; /* the pillarbox bars */
+}
 
-  <link rel="preload" href="./assets/stag-study.png" as="image">
-  <link rel="preload" href="./assets/hot-book.png" as="image">
+/* Center the scene */
+.scene {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  <link rel="stylesheet" href="./styles.css">
-</head>
+/* Scene box matches image height */
+.scene-inner {
+  position: relative;
+  height: 100vh;    /* key: image is as tall as the viewport */
+}
 
-<body>
-  <main class="scene">
-    <div class="scene-inner">
-      <img class="scene-bg" src="./assets/stag-study.png" draggable="false" />
-
-      <button id="bookAnchor" class="book-anchor" type="button">
-        <span class="shadow-ambient"></span>
-        <span class="shadow-contact"></span>
-        <img class="book-img" src="./assets/hot-book.png" draggable="false" />
-        <canvas id="embers" class="embers"></canvas>
-      </button>
-
-    </div>
-  </main>
-
-  <script src="./script.js" defer></script>
-</body>
-</html>
+/* BACKGROUND IMAGE — this is the “photo” look in your pic */
+.scene-bg {
+  display: block;
+  height: 100vh;    /* lock to viewport height */
+  width: auto;      /* let width expand/shrink */
+  max-width: 100vw; /* never overflow horizontally */
+  user-select: none;
+  pointer-events: none;
+}
