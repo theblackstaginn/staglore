@@ -29,9 +29,9 @@
   function spawnOne() {
     const r = Math.random();
 
-    // Two bands:
-    // - Right page edge (vertical)
-    // - Top edge (horizontal)
+    // Two source bands:
+    // - Right page edge (vertical strip)
+    // - Top edge (horizontal strip)
     let x, y, vx, vy;
 
     if (r < 0.55) {
@@ -64,10 +64,10 @@
   function step() {
     raf = requestAnimationFrame(step);
 
-    // Keep canvas fully transparent except for embers
+    // Clear without any background — canvas stays transparent
     ctx.clearRect(0, 0, w, h);
 
-    // Spawn a few per frame
+    // Spawn a few embers each frame
     const spawns = 3;
     for (let i = 0; i < spawns; i++) spawnOne();
 
@@ -75,7 +75,7 @@
       const s = sparks[i];
       s.t++;
 
-      // Drift + gentle swirl
+      // Drift + subtle swirl
       s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06;
       s.y += s.vy;
 
@@ -96,7 +96,7 @@
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // Hotter core sometimes
+      // Occasional hotter core
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
