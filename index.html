@@ -4,56 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stag Lore</title>
-  <meta name="description" content="The Black Stag Inn — Grimoire." />
 
-  <!-- Preload key images -->
-  <link rel="preload" as="image" href="./assets/stag-study.png">
-  <link rel="preload" as="image" href="./assets/hot-book.png">
+  <link rel="preload" href="./assets/stag-study.png" as="image">
+  <link rel="preload" href="./assets/hot-book.png" as="image">
 
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
-  <main class="scene" role="main" aria-label="Stag Lore desk">
+  <main class="scene">
     <div class="scene-inner">
+      <img class="scene-bg" src="./assets/stag-study.png" draggable="false" />
 
-      <!-- Background image -->
-      <img
-        src="./assets/stag-study.png"
-        alt="Wizard's study with books, candle and alchemy tools"
-        class="scene-bg"
-        draggable="false"
-      />
-
-      <!-- Hot / interactive book overlay -->
-      <button
-        id="bookAnchor"
-        class="book-anchor"
-        type="button"
-        aria-label="Ancient grimoire with stag sigil"
-      >
-        <!-- Shadows to ground the book -->
-        <span class="shadow-ambient" aria-hidden="true"></span>
-        <span class="shadow-contact" aria-hidden="true"></span>
-
-        <!-- Transparent cutout of the book on stand -->
-        <img
-          id="bookImg"
-          class="book-img"
-          src="./assets/hot-book.png"
-          alt=""
-          draggable="false"
-        />
-
-        <!-- Ember canvas -->
-        <canvas
-          id="embers"
-          class="embers"
-          aria-hidden="true">
-        </canvas>
-
-        <!-- Optional hint -->
-        <span class="book-hint" aria-hidden="true">CLICK</span>
+      <button id="bookAnchor" class="book-anchor" type="button">
+        <span class="shadow-ambient"></span>
+        <span class="shadow-contact"></span>
+        <img class="book-img" src="./assets/hot-book.png" draggable="false" />
+        <canvas id="embers" class="embers"></canvas>
       </button>
 
     </div>
