@@ -13,19 +13,16 @@
   // ================================
   // FIXED SPAWN REGIONS IN CANVAS
   // ================================
-  // These are fractions of the (expanded) embers canvas.
-  // Tweak these four numbers per box to move the paths around
-  // without touching the particle logic.
 
-  // Narrow band that sits along the *top lip* of the book
+  // Top lip band (tuned to sit on the top of the book)
   const spawnTopBox = {
-    x: 0.30, // left edge of top band
-    y: 0.10, // vertical position of top band
-    w: 0.40, // width of top band
-    h: 0.12  // height of top band
+    x: 0.34, // left edge of top band
+    y: 0.20, // vertical position of top band (closer to book)
+    w: 0.36, // width of top band
+    h: 0.08  // thinner vertical band
   };
 
-  // Vertical band that hugs the *right edge* of the book
+  // Vertical band that hugs the right edge of the book
   const spawnRightBox = {
     x: 0.60, // left edge of right band
     y: 0.14, // top of right band
@@ -70,13 +67,13 @@
       // --------- TOP PATH ----------
       // Horizontal band across the top lip (inside spawnTopBox)
 
-      const t = Math.random();      // 0 → 1 along the band
-      let nx = t;                   // normalized horizontal
-      let ny = 0.5;                 // middle of the band vertically
+      const t = Math.random(); // 0 → 1 along the band
+      let nx = t;
+      let ny = 0.5;            // middle of band vertically
 
       // Light jitter so it's not a perfect line
       nx += (Math.random() - 0.5) * 0.12;
-      ny += (Math.random() - 0.5) * 0.25;
+      ny += (Math.random() - 0.5) * 0.12; // tightened vertical spread
 
       // Clamp within [0,1]
       nx = Math.min(0.98, Math.max(0.02, nx));
@@ -89,12 +86,12 @@
       // --------- RIGHT PATH ----------
       // Mostly vertical band down the right edge (inside spawnRightBox)
 
-      const t = Math.random();      // 0 → 1 down the band
-      let nx = 0.5;                 // center of right band horizontally
-      let ny = t;                   // 0 → 1 from top to bottom
+      const t = Math.random(); // 0 → 1 down the band
+      let nx = 0.5;            // center horizontally in right band
+      let ny = t;              // 0 → 1 from top to bottom
 
       // Slight inward lean + jitter
-      nx += (Math.random() - 0.5) * 0.20; // more sideways variation here
+      nx += (Math.random() - 0.5) * 0.20;
       ny += (Math.random() - 0.5) * 0.10;
 
       nx = Math.min(0.98, Math.max(0.02, nx));
