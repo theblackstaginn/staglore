@@ -1,22 +1,13 @@
-/* =========================================================
-   Stag Lore — Desk + Book (SNAP SYSTEM)
-   - Background is an <img> with object-fit: cover
-   - Book anchor is positioned/sized by JS using Photopea map
-   - Hot book overlays the baked book perfectly
-   ========================================================= */
-
 :root{
   --text: rgba(231,226,219,.92);
 
-  /* Book 3D tuning (visual only; position handled by JS) */
+  /* Visual-only 3D */
   --tiltX: 12deg;
   --tiltZ: -7deg;
 
-  /* Glow */
   --glowA: rgba(255, 168, 64, .22);
   --glowB: rgba(255, 120, 40, .12);
 
-  /* Vignette strength */
   --v1: .08;
   --v2: .58;
 }
@@ -32,9 +23,7 @@ body{
   font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 
-/* =========================
-   BACKGROUND (fixed image)
-   ========================= */
+/* Background image: the “truth” layer */
 .bg{
   position:fixed;
   inset:0;
@@ -48,7 +37,7 @@ body{
   pointer-events:none;
 }
 
-/* Atmos overlay (dust / vignette) */
+/* Atmos overlay */
 .atmos{
   position:fixed;
   inset:0;
@@ -60,26 +49,22 @@ body{
     linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
 }
 
-/* =========================
-   STAGE
-   ========================= */
-.stage{
+.stage, .desk-scene{
   position:relative;
-  height:100%;
   width:100%;
+  height:100%;
 }
 
-.desk-scene{
-  position:relative;
-  height:100%;
-  width:100%;
-}
-
-/* =========================
-   BOOK ANCHOR (snapped by JS)
-   ========================= */
+/* The clickable overlay. JS sets left/top/width/height.
+   Fallback just in case JS fails: you’ll still SEE it. */
 .book-anchor{
-  position:absolute; /* JS sets left/top/width/height */
+  position:absolute;
+  left: 50%;
+  top: 60%;
+  width: 220px;
+  height: 320px;
+  transform: translate(-50%, -50%);
+
   padding:0;
   border:0;
   background:transparent;
@@ -90,7 +75,7 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Book image (fills anchor; visual transform only) */
+/* Book fills the anchor */
 .book{
   position:absolute;
   inset:0;
@@ -99,16 +84,13 @@ body{
   display:block;
   pointer-events:none;
 
-  transform:
-    perspective(900px)
-    rotateX(var(--tiltX))
-    rotateZ(var(--tiltZ));
+  transform: perspective(900px) rotateX(var(--tiltX)) rotateZ(var(--tiltZ));
   transform-origin: 50% 60%;
 
   filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
 }
 
-/* Ambient shadow (broad, soft) */
+/* Shadows to ground it */
 .shadow-ambient{
   position:absolute;
   left:50%;
@@ -117,16 +99,12 @@ body{
   height: 28%;
   transform: translate(-50%, -50%) rotateZ(var(--tiltZ));
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%,
-    rgba(0,0,0,.32),
-    rgba(0,0,0,0) 70%
-  );
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.32), rgba(0,0,0,0) 70%);
   filter: blur(10px);
   opacity: .65;
   pointer-events:none;
 }
 
-/* Contact shadow (tight; kills “hovering”) */
 .shadow-contact{
   position:absolute;
   left:50%;
@@ -135,16 +113,13 @@ body{
   height: 18%;
   transform: translate(-50%, -50%) rotateZ(var(--tiltZ));
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 55%,
-    rgba(0,0,0,.45),
-    rgba(0,0,0,0) 65%
-  );
+  background: radial-gradient(circle at 50% 55%, rgba(0,0,0,.45), rgba(0,0,0,0) 65%);
   filter: blur(6px);
   opacity: .92;
   pointer-events:none;
 }
 
-/* Embers canvas sits above book */
+/* Embers */
 .embers{
   position:absolute;
   inset:0;
@@ -156,7 +131,6 @@ body{
   transition: opacity .22s ease;
 }
 
-/* Optional hint */
 .book-hint{
   position:absolute;
   left:50%;
@@ -170,11 +144,9 @@ body{
   pointer-events:none;
 }
 
-/* Hover / focus: ritual wake */
+/* Wake */
 .book-anchor:hover .embers,
-.book-anchor:focus-visible .embers{
-  opacity:1;
-}
+.book-anchor:focus-visible .embers{ opacity:1; }
 
 .book-anchor:hover .book,
 .book-anchor:focus-visible .book{
@@ -190,7 +162,6 @@ body{
   border-radius: 18px;
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   .embers{ transition:none; }
   .book-anchor:hover .book{ filter: drop-shadow(0 18px 26px rgba(0,0,0,.52)); }
