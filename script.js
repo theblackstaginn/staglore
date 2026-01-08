@@ -10,13 +10,27 @@
   const sparks = [];
   const MAX = 80;
 
-  // === FIXED-SIZE SPAWN BOX INSIDE THE EXPANDED CANVAS ===
-  // This prevents the 7-shape from scaling when the canvas is enlarged.
-  const spawnBox = {
-    x: 0.20, // left offset (fraction of canvas width)
-    y: 0.00, // top offset
-    w: 0.60, // width fraction of canvas for the 7-shape
-    h: 0.50  // height fraction of canvas for the 7-shape
+  // ================================
+  // FIXED SPAWN REGIONS IN CANVAS
+  // ================================
+  // These are fractions of the (expanded) embers canvas.
+  // Tweak these four numbers per box to move the paths around
+  // without touching the particle logic.
+
+  // Narrow band that sits along the *top lip* of the book
+  const spawnTopBox = {
+    x: 0.30, // left edge of top band
+    y: 0.10, // vertical position of top band
+    w: 0.40, // width of top band
+    h: 0.12  // height of top band
+  };
+
+  // Vertical band that hugs the *right edge* of the book
+  const spawnRightBox = {
+    x: 0.60, // left edge of right band
+    y: 0.14, // top of right band
+    w: 0.16, // width of right band
+    h: 0.55  // height of right band
   };
 
   function rand(min, max) {
@@ -44,54 +58,70 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // === EMBER SPAWN LOGIC (RIGHT-EDGE 7-SHAPE) ===
-  // === EMBER SPAWN LOGIC (RIGHT-EDGE 7-SHAPE) ===
-function spawnOne() {
-  const t = Math.random();
-  let nx, ny;
+  // =======================================
+  // EMBER SPAWN LOGIC — TWO SEPARATE PATHS
+  // =======================================
+  function spawnOne() {
+    const useTopPath = Math.random() < 0.6; // 60% top, 40% right
 
-  if (Math.random() < 0.6) {
-    // TOP BAR – short, only on the right side of the book
-    // from about 60% → 95% across, near the top edge
-    const tBar = t;
-    nx = 0.60 + 0.35 * tBar; // 0.60 → 0.95
-    ny = 0.15;               // slight offset down from very top
-  } else {
-    // RIGHT LEG – almost vertical, hugging the right edge
-    // start near top-right corner and fall mostly straight down
-    const t2 = t;
-    nx = 0.90 + (0.84 - 0.90) * t2; // 0.90 → 0.84 (this is the fixed line)
-    ny = 0.15 + (0.80 - 0.15) * t2; // 0.15 → 0.80 (down the edge)
+    let x, y;
+
+    if (useTopPath) {
+      // --------- TOP PATH ----------
+      // Horizontal band across the top lip (inside spawnTopBox)
+
+      const t = Math.random();      // 0 → 1 along the band
+      let nx = t;                   // normalized horizontal
+      let ny = 0.5;                 // middle of the band vertically
+
+      // Light jitter so it's not a perfect line
+      nx += (Math.random() - 0.5) * 0.12;
+      ny += (Math.random() - 0.5) * 0.25;
+
+      // Clamp within [0,1]
+      nx = Math.min(0.98, Math.max(0.02, nx));
+      ny = Math.min(0.98, Math.max(0.02, ny));
+
+      x = (spawnTopBox.x + nx * spawnTopBox.w) * w;
+      y = (spawnTopBox.y + ny * spawnTopBox.h) * h;
+
+    } else {
+      // --------- RIGHT PATH ----------
+      // Mostly vertical band down the right edge (inside spawnRightBox)
+
+      const t = Math.random();      // 0 → 1 down the band
+      let nx = 0.5;                 // center of right band horizontally
+      let ny = t;                   // 0 → 1 from top to bottom
+
+      // Slight inward lean + jitter
+      nx += (Math.random() - 0.5) * 0.20; // more sideways variation here
+      ny += (Math.random() - 0.5) * 0.10;
+
+      nx = Math.min(0.98, Math.max(0.02, nx));
+      ny = Math.min(0.98, Math.max(0.02, ny));
+
+      x = (spawnRightBox.x + nx * spawnRightBox.w) * w;
+      y = (spawnRightBox.y + ny * spawnRightBox.h) * h;
+    }
+
+    // Ember motion: same for both paths
+    const vx = (Math.random() - 0.5) * 0.15; // slight sideways drift
+    const vy = rand(-0.65, -0.40);          // rise up
+
+    sparks.push({
+      x,
+      y,
+      vx,
+      vy,
+      r: rand(0.8, 2.2),
+      a: rand(0.4, 0.9),
+      life: rand(32, 70),
+      t: 0,
+      tw: rand(0.004, 0.012)
+    });
+
+    if (sparks.length > MAX) sparks.shift();
   }
-
-  // Small jitter so it doesn't look ruler-straight
-  nx += (Math.random() - 0.5) * 0.02;
-  ny += (Math.random() - 0.5) * 0.02;
-
-  // Clamp normalized UV inside logical shape
-  nx = Math.min(0.98, Math.max(0.02, nx));
-  ny = Math.min(0.98, Math.max(0.02, ny));
-
-  // Map into fixed spawnBox inside the canvas
-  const x = (spawnBox.x * w) + (nx * spawnBox.w * w);
-  const y = (spawnBox.y * h) + (ny * spawnBox.h * h);
-
-  // Ember motion (unchanged)
-  const vx = (Math.random() - 0.5) * 0.15;
-  const vy = rand(-0.65, -0.40);
-
-  sparks.push({
-    x, y,
-    vx, vy,
-    r: rand(0.8, 2.2),
-    a: rand(0.4, 0.9),
-    life: rand(32, 70),
-    t: 0,
-    tw: rand(0.004, 0.012)
-  });
-
-  if (sparks.length > MAX) sparks.shift();
-}
 
   function step() {
     raf = requestAnimationFrame(step);
