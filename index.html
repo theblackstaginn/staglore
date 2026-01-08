@@ -7,8 +7,8 @@
   <meta name="description" content="The Black Stag Inn — Grimoire." />
 
   <!-- Preload key images for faster first paint -->
-  <link rel="preload" as="image" href="./assets/desk-bg.png">
-  <link rel="preload" as="image" href="./assets/book-frame_01.png">
+  <link rel="preload" as="image" href="./assets/stag-study.png">
+  <link rel="preload" as="image" href="./assets/hot-book.png">
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -23,17 +23,22 @@
   <main class="stage" role="main" aria-label="Stag Lore desk">
     <section class="desk-scene" aria-label="Desk scene">
 
-      <!-- The clickable / hoverable "book on desk" -->
-      <button class="book-anchor" id="bookAnchor" type="button" aria-label="Ancient grimoire with stag sigil">
+      <!-- The clickable / hoverable "hot book" -->
+      <button
+        class="book-anchor"
+        id="bookAnchor"
+        type="button"
+        aria-label="Ancient grimoire with stag sigil"
+      >
         <!-- Grounding shadows -->
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
-        <!-- Book itself -->
+        <!-- Book cutout (transparent PNG) -->
         <img
           class="book"
           id="bookImg"
-          src="./assets/book-frame_01.png"
+          src="./assets/hot-book.png"
           alt="Antique grimoire with stag sigil"
           draggable="false"
           loading="eager"
