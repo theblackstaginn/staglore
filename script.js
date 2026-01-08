@@ -53,7 +53,7 @@ function spawnOne() {
   if (Math.random() < 0.6) {
     // TOP BAR – short, only on the right side of the book
     // from about 60% → 95% across, near the top edge
-    nx = 0.60 + 0.35 * t;  // 0.60 → 0.95
+    nx = 0.90 + (0.87 - 0.90) * t2; // 0.90 → 0.87 for almost straight down
     ny = 0.15;             // slight offset down from very top
   } else {
     // RIGHT LEG – almost vertical, hugging the right edge
