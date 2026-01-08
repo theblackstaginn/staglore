@@ -86,19 +86,14 @@ body{
 
 .book-anchor{
   position:absolute;
-  left:var(--bookX);
-  top:var(--bookY);
-  transform:translate(-50%, -50%);
-  width:var(--bookWidth);
-  aspect-ratio: 3 / 4;
-  padding:0;
-  border:0;
-  background:transparent;
-  cursor:pointer;
-  z-index:2;
+  left: calc(var(--bookX) * 1%);
+  top:  calc(var(--bookY) * 1%);
+  width: calc(var(--bookWidth) * 1%);
 
-  user-select:none;
-  -webkit-tap-highlight-color:transparent;
+  /* center AND allow breathing */
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: 50% 60%;
+  transition: transform 0.85s ease;
 }
 
 /* Book image sitting exactly in the anchor box */
