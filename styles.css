@@ -1,11 +1,11 @@
 /* =========================================================
-   Stag Lore — Layout + Book + Embers
-   - Background scene centered on page
-   - Book button positioned over background book
-   - Canvas overlays book, fully transparent
+   Stag Lore — Layout + Background + Hot Book + Embers
+   - Background study centered on page
+   - Hot book overlays painted book
+   - Embers canvas pinned to book bounds
    ========================================================= */
 
-/* ----- Base reset / page scaffold ----- */
+/* ---------- Base reset ---------- */
 
 *,
 *::before,
@@ -22,11 +22,11 @@ body {
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background-color: #050608; /* dark frame around scene */
+  background-color: #050608; /* dark frame around the scene */
   color: #f5f5f5;
 }
 
-/* Main scene container */
+/* ---------- Scene container ---------- */
 
 .scene {
   min-height: 100vh;
@@ -40,7 +40,6 @@ body {
   position: relative;
   width: min(100vw - 32px, 1200px);
   max-width: 1200px;
-  /* Keep image crisp and scaled */
 }
 
 /* Background image (desk + book) */
@@ -53,19 +52,19 @@ body {
   pointer-events: none;
 }
 
-/* ----- Book anchor (hot book) ----- */
+/* ---------- Hot book button ---------- */
 
-/* This is your clickable / hoverable book overlay */
 .book-anchor {
   position: absolute;
 
-  /* POSITIONING:
-     These numbers are guesses based on a typical composition.
-     You’ll tweak top/left/width until it sits perfectly over the book.
+  /* These are the aligned values from the last “it’s covering and looks decent” state:
+     - Slightly larger than bg book
+     - Nudged up and a bit right
+     Adjust by small percentages if you need micro-alignment.
   */
-  top: 58%;
-  left: 54%;
-  width: 20%;
+  top: 59%;
+  left: 56%;
+  width: 26%;
 
   transform: translate(-50%, -50%);
 
@@ -78,36 +77,38 @@ body {
   display: block;
   outline: none;
 
-  /* For stacking above background */
   z-index: 10;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Ambient + contact shadows, purely visual if you want them */
+/* Optional shadow layers under the book */
 
 .shadow-ambient,
 .shadow-contact {
   position: absolute;
-  inset: 0;
+  inset: 8% 6% 2% 6%; /* smaller than full to keep it under the book */
   pointer-events: none;
+  border-radius: 999px;
 }
 
-/* Soft big glow under book */
+/* Soft ambient glow */
+
 .shadow-ambient {
+  background: radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.7), transparent 70%);
   filter: blur(24px);
   opacity: 0.45;
-  border-radius: 999px;
-  background: radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.8), transparent 65%);
 }
 
-/* Tighter, darker contact shadow */
+/* Tighter contact shadow */
+
 .shadow-contact {
-  filter: blur(8px);
+  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.9), transparent 75%);
+  filter: blur(10px);
   opacity: 0.7;
-  border-radius: 999px;
-  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.9), transparent 70%);
 }
 
-/* Book image itself */
+/* Book image */
 
 .book-img {
   position: relative;
@@ -119,7 +120,7 @@ body {
   z-index: 1;
 }
 
-/* Slight hover lift if you want a bit of magic */
+/* Slight lift on hover/focus for a bit of magic */
 
 .book-anchor:hover .book-img,
 .book-anchor:focus-visible .book-img {
@@ -127,23 +128,15 @@ body {
   transition: transform 160ms ease-out;
 }
 
-/* ----- Embers canvas ----- */
+/* ---------- Embers canvas ---------- */
 
 .embers {
   position: absolute;
-  inset: 0;              /* fill the book area */
+  inset: 0;          /* Fill the book-anchor box */
   width: 100%;
   height: 100%;
   display: block;
-  pointer-events: none;  /* so clicks go to the button */
+  pointer-events: none; /* Allow clicks to hit the button */
   z-index: 2;
-
-  /* Critical: no background so it stays invisible except for drawn embers */
-  background: transparent;
-}
-
-/* Optional: remove mobile tap highlight on the button */
-
-.book-anchor {
-  -webkit-tap-highlight-color: transparent;
+  background: transparent; /* No box, only embers */
 }
