@@ -11,60 +11,64 @@
 
   /* Book placement within the scene box
      (percentage of .scene-inner width/height) */
-  --bookX: 55.5%;          /* horizontal position (0–100) */
-  --bookY: 45.5%;          /* vertical position   (0–100) */
-  --bookWidth: 29%;      /* width as % of scene width */
+  --bookX: 55.5%;   /* horizontal position (0–100) */
+  --bookY: 45.5%;   /* vertical position   (0–100) */
+  --bookWidth: 29%; /* width as % of scene width   */
 
-  /* Glow */
-  --glowA: rgba(255,168,64,.22);
-  --glowB: rgba(255,120,40,.12);
+  /* Ember glow color (cool blue for contrast) */
+  --emberOuter: rgba(134, 202, 255, 0.55);
+  --emberInner: rgba(214, 242, 255, 0.85);
 
+  /* Vignette */
   --v1: .08;
   --v2: .58;
 }
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+}
 
 body{
-  margin:0;
   background:var(--bg-dark);
   color:var(--text);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
+  overflow:hidden;
 }
 
 /* =========================
-   SCENE LAYOUT (GRID)
+   SCENE
    ========================= */
 
 .scene{
-  min-height:100vh;
+  height:100vh;
+  width:100%;
   display:flex;
   align-items:center;
   justify-content:center;
-  background: radial-gradient(circle at 10% 0%, #17191e, #050608 60%);
 }
 
 .scene-inner{
   position:relative;
   width:min(1200px, 100vw);
-  aspect-ratio: 3 / 2;      /* matches 1536x1024 */
-  overflow:hidden;
+  margin:0 auto;
 }
 
-/* Background image sits behind everything */
+/* Background image */
 .scene-bg{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
   display:block;
-  user-select:none;
+  width:100%;
+  height:auto;
   pointer-events:none;
 }
 
-/* Atmosphere overlay */
+/* Soft vignette overlay */
 .scene-inner::after{
   content:"";
   position:absolute;
@@ -74,142 +78,133 @@ body{
     radial-gradient(120% 90% at 50% 10%, rgba(255,255,255,var(--v1)), transparent 60%),
     radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,var(--v2)) 100%),
     linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
+  mix-blend-mode:normal;
 }
 
 /* =========================
-   HOT BOOK BUTTON (OVERLAY)
+   BOOK ANCHOR
    ========================= */
 
 .book-anchor{
   position:absolute;
-  /* place center of anchor using CSS vars */
   left:var(--bookX);
   top:var(--bookY);
   transform:translate(-50%, -50%);
-
   width:var(--bookWidth);
-  aspect-ratio: 4 / 6;   /* approximate book shape */
-
   padding:0;
   border:0;
   background:transparent;
   cursor:pointer;
   z-index:10;
-
   user-select:none;
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Transparent book cutout — NO extra tilt/rotation */
+/* Hot book image */
 .book-img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
   display:block;
+  width:100%;
+  height:auto;
   pointer-events:none;
-
-  /* no perspective / rotate here; use the PNG as-is */
-  transform:none;
-  transform-origin:50% 50%;
-
-  filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
+  filter:
+    drop-shadow(0 18px 26px rgba(0,0,0,.55));
 }
 
-/* Shadows to keep it grounded (no extra rotate) */
+/* Ambient shadow (broad) */
 .shadow-ambient{
   position:absolute;
   left:50%;
-  top:58%;
-  width:82%;
-  height:28%;
+  top:73%;
+  width:86%;
+  height:26%;
   transform:translate(-50%, -50%);
   border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.32), rgba(0,0,0,0) 70%);
-  filter:blur(10px);
-  opacity:.65;
+  background:radial-gradient(circle at 50% 50%,
+    rgba(0,0,0,.32),
+    rgba(0,0,0,0) 70%
+  );
+  filter:blur(12px);
+  opacity:.68;
   pointer-events:none;
+  z-index:0;
 }
 
+/* Contact shadow (tight) */
 .shadow-contact{
   position:absolute;
   left:50%;
-  top:62%;
-  width:74%;
+  top:77%;
+  width:78%;
   height:18%;
   transform:translate(-50%, -50%);
   border-radius:50%;
-  background:radial-gradient(circle at 50% 55%, rgba(0,0,0,.45), rgba(0,0,0,0) 65%);
+  background:radial-gradient(circle at 50% 55%,
+    rgba(0,0,0,.50),
+    rgba(0,0,0,0) 65%
+  );
   filter:blur(6px);
-  opacity:.92;
+  opacity:.96;
   pointer-events:none;
+  z-index:0;
 }
 
-/* Ember canvas */
-.book-anchor .embers{
+/* =========================
+   EMBERS CANVAS — top + right edge only
+   ========================= */
+
+.embers{
   position:absolute;
+  /* this rectangle hugs the top + right of the book */
+  left:56%;          /* start a bit right of center of book */
+  top:0%;
+  width:44%;        /* right portion of book */
+  height:56%;       /* top portion of book */
   pointer-events:none;
-
-  /* Bigger than the visible page so sparks aren't clipped */
-  left:45%;   /* start around middle of cover */
-  top:-8%;    /* extend a bit above the top edge */
-  width:55%;  /* run all the way to the right plus a little */
-  height:65%; /* cover whole right side and a bit below */
-
-  transform:translate(0,0);
-  overflow:visible;  /* just in case */
+  opacity:0;
+  background:transparent !important;
+  z-index:20;
+  overflow:visible;
+  transition:opacity .22s ease;
 }
 
-/* Hint text */
+/* Hint text (optional) */
 .book-hint{
   position:absolute;
   left:50%;
-  top:96%;
+  top:97%;
   transform:translate(-50%, -50%);
   font-size:11px;
   letter-spacing:.28em;
   opacity:.42;
   text-transform:uppercase;
-  z-index:12;
   pointer-events:none;
+  z-index:25;
 }
 
-/* Hover / focus glow + embers */
+/* Hover / focus: activate embers + glow */
 .book-anchor:hover .embers,
 .book-anchor:focus-visible .embers{
   opacity:1;
 }
 
-.book-anchor:hover .book,
-.book-anchor:focus-visible .book{
+.book-anchor:hover .book-img,
+.book-anchor:focus-visible .book-img{
   filter:
-    /* ground shadow, unchanged */
-    drop-shadow(0 18px 26px rgba(0,0,0,.52))
-    /* strong warm glow from right edge */
-    drop-shadow(14px -4px 26px var(--glowA))
-    /* softer halo from top edge */
-    drop-shadow(0 -10px 34px var(--glowB));
+    drop-shadow(0 18px 26px rgba(0,0,0,.60))
+    drop-shadow(0 0 32px rgba(134,202,255,.40))
+    drop-shadow(0 0 72px rgba(134,202,255,.25));
 }
 
 .book-anchor:focus-visible{
-  outline:2px solid rgba(255,190,120,.8);
-  outline-offset:6px;
-  border-radius:18px;
+  outline:2px solid rgba(134,202,255,.45);
+  outline-offset:8px;
 }
 
-/* Reduced motion: keep embers but no fade */
-@media (prefers-reduced-motion: reduce){
-  .embers{ transition:none; }
-  .book-anchor:hover .book-img{
-    filter: drop-shadow(0 18px 26px rgba(0,0,0,.52));
-  }
-}
-
-/* Mobile: slightly larger book, centered more */
-@media (max-width: 768px){
+/* Small screens: keep everything on screen */
+@media (max-width: 760px){
   :root{
-    --bookX: 52%;
-    --bookY: 60%;
-    --bookWidth: 40%;
+    --bookX: 55%;
+    --bookY: 50%;
+    --bookWidth: 62%;
   }
 }
