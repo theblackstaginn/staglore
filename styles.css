@@ -149,14 +149,11 @@ body{
 .book-anchor .embers{
   position:absolute;
   pointer-events:none;
-
-  /* Canvas clamps to upper-right quadrant of the book */
-  left:55%;          /* moves canvas to right page edge */
-  top:0%;            /* sits at the top edge */
-  width:45%;         /* only right page slice */
-  height:40%;        /* only upper portion */
-
-  transform:translate(0,0); /* no centering */
+  left:55%;
+  top:0%;
+  width:45%;
+  height:40%;
+  transform:translate(0,0);
 }
 
 /* Hint text */
