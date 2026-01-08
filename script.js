@@ -1,74 +1,58 @@
 /* =========================================================
-   Stag Lore — Snap + Embers (Phase 1)
-   - Snaps hot-book.png to baked book location in stag-study.png
-   - Uses object-fit: cover math to align precisely on any screen
-   - Runs embers only on hover/focus
+   Stag Lore — Snap + Embers
+   - Align hot-book.png to baked book in stag-study.png
    ========================================================= */
 
 (() => {
-  const bgImg   = document.getElementById("bgImg");
-  const anchor  = document.getElementById("bookAnchor");
-  const canvas  = document.getElementById("embers");
-  const ctx     = canvas.getContext("2d", { alpha: true });
+  const bgImg  = document.getElementById("bgImg");
+  const anchor = document.getElementById("bookAnchor");
+  const canvas = document.getElementById("embers");
+  const ctx    = canvas.getContext("2d", { alpha: true });
 
-  // === PHOTOPEA MAP (from your screenshot) =================
-  // Background image pixels (natural size)
+  // === PHOTOPEA MAP (1536 x 1024 image) ===================
   const BG_W = 1536;
   const BG_H = 1024;
 
-  // Book bounding box inside that image (pixels)
-  // X/Y are top-left of selection, W/H are selection width/height.
-  const BOOK_BOX = { x: 1302, y: 863, w: 411, h: 610 };
-  // =========================================================
+  // Book selection (X, Y, W, H) from your last screenshot
+  const BOOK = { x: 1302, y: 863, w: 411, h: 610 };
+  // ========================================================
 
-  // -----------------------------
-  // SNAP MATH (cover)
-  // -----------------------------
   function getCoverMapping() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // object-fit: cover scale
     const scale = Math.max(vw / BG_W, vh / BG_H);
-
     const drawnW = BG_W * scale;
     const drawnH = BG_H * scale;
 
-    // centered crop offsets
     const offsetX = (vw - drawnW) / 2;
     const offsetY = (vh - drawnH) / 2;
 
     return { scale, offsetX, offsetY };
   }
 
-  function snapAnchorToBook() {
-    // Wait until bg is fully decoded so size is reliable
+  function snapAnchor() {
     if (!bgImg.complete) return;
 
     const { scale, offsetX, offsetY } = getCoverMapping();
 
-    const left = offsetX + BOOK_BOX.x * scale;
-    const top  = offsetY + BOOK_BOX.y * scale;
-    const w    = BOOK_BOX.w * scale;
-    const h    = BOOK_BOX.h * scale;
+    const left = offsetX + BOOK.x * scale;
+    const top  = offsetY + BOOK.y * scale;
+    const w    = BOOK.w * scale;
+    const h    = BOOK.h * scale;
 
-    // Position the anchor EXACTLY to baked-book box
-    anchor.style.left = `${left}px`;
-    anchor.style.top = `${top}px`;
-    anchor.style.width = `${w}px`;
+    anchor.style.left   = `${left}px`;
+    anchor.style.top    = `${top}px`;
+    anchor.style.width  = `${w}px`;
     anchor.style.height = `${h}px`;
+    anchor.style.transform = "none"; // kill fallback translate
 
-    // IMPORTANT: remove fallback translate once JS is live
-    anchor.style.transform = "none";
-
-    // Resize embers canvas to match anchor
     resizeCanvas();
   }
 
-  // -----------------------------
-  // EMBERS
-  // -----------------------------
-  let w = 0, h = 0, dpr = 1;
+  // -------------- Embers -----------------
+
+  let cw = 0, ch = 0, dpr = 1;
   let running = false;
   let raf = 0;
   const sparks = [];
@@ -77,23 +61,20 @@
   function resizeCanvas() {
     const rect = anchor.getBoundingClientRect();
     dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    w = Math.max(1, Math.floor(rect.width));
-    h = Math.max(1, Math.floor(rect.height));
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    canvas.style.width = `${w}px`;
-    canvas.style.height = `${h}px`;
+    cw = Math.max(1, Math.floor(rect.width));
+    ch = Math.max(1, Math.floor(rect.height));
+    canvas.width  = Math.floor(cw * dpr);
+    canvas.height = Math.floor(ch * dpr);
+    canvas.style.width  = `${cw}px`;
+    canvas.style.height = `${ch}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function rand(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+  function rand(a,b){ return Math.random()*(b-a)+a; }
 
   function spawn() {
-    // Spawn from lower-middle area, drift upward
-    const x = rand(w * 0.38, w * 0.62);
-    const y = rand(h * 0.62, h * 0.78);
+    const x = rand(cw * 0.38, cw * 0.62);
+    const y = rand(ch * 0.62, ch * 0.78);
 
     sparks.push({
       x, y,
@@ -113,9 +94,8 @@
     raf = requestAnimationFrame(step);
 
     ctx.fillStyle = "rgba(0,0,0,0.12)";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, cw, ch);
 
-    // Spawn a couple per frame
     for (let i = 0; i < 2; i++) spawn();
 
     for (let i = sparks.length - 1; i >= 0; i--) {
@@ -141,7 +121,7 @@
         ctx.fill();
       }
 
-      if (s.t >= s.life || s.y < -10 || s.x < -20 || s.x > w + 20) {
+      if (s.t >= s.life || s.y < -10 || s.x < -20 || s.x > cw + 20) {
         sparks.splice(i, 1);
       }
     }
@@ -151,7 +131,7 @@
     if (running) return;
     running = true;
     resizeCanvas();
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, cw, ch);
     sparks.length = 0;
     cancelAnimationFrame(raf);
     step();
@@ -162,36 +142,29 @@
     cancelAnimationFrame(raf);
     raf = 0;
     setTimeout(() => {
-      if (!running) ctx.clearRect(0, 0, w, h);
+      if (!running) ctx.clearRect(0, 0, cw, ch);
     }, 120);
   }
 
-  // -----------------------------
-  // EVENTS
-  // -----------------------------
-  anchor.addEventListener("click", () => {
-    anchor.classList.add("clicked");
-    setTimeout(() => anchor.classList.remove("clicked"), 240);
-  });
+  // -------------- Events -----------------
 
   anchor.addEventListener("mouseenter", start);
   anchor.addEventListener("mouseleave", stop);
   anchor.addEventListener("focusin", start);
   anchor.addEventListener("focusout", stop);
 
-  // Re-snap on resize
-  window.addEventListener("resize", () => {
-    snapAnchorToBook();
-  }, { passive: true });
+  anchor.addEventListener("click", () => {
+    anchor.classList.add("clicked");
+    setTimeout(() => anchor.classList.remove("clicked"), 240);
+  });
 
-  // Ensure snap after image loads/decodes
+  window.addEventListener("resize", snapAnchor, { passive:true });
+
   async function init() {
     try {
-      if (bgImg.decode) await bgImg.decode();
-    } catch (_) {
-      // decode can fail on some browsers; ignore
-    }
-    snapAnchorToBook();
+      if (bgImg.decode) { await bgImg.decode(); }
+    } catch(_) {}
+    snapAnchor();
   }
 
   init();
