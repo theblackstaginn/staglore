@@ -17,7 +17,7 @@
   <main class="scene" role="main" aria-label="Stag Lore desk">
     <div class="scene-inner">
 
-      <!-- Background image -->
+      <!-- Background scene -->
       <img
         src="./assets/stag-study.png"
         alt="Wizard's study with books, candle and alchemy tools"
@@ -36,7 +36,7 @@
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
-        <!-- Transparent cutout of the book on stand -->
+        <!-- Cutout of the book + stand (PNG with transparency) -->
         <img
           id="bookImg"
           class="book-img"
@@ -45,7 +45,7 @@
           draggable="false"
         />
 
-        <!-- Ember canvas (fully transparent, sparks only) -->
+        <!-- Ember canvas (sits over the book) -->
         <canvas
           id="embers"
           class="embers"
