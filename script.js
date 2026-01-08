@@ -1,9 +1,3 @@
-/* =========================================================
-   Stag Lore — Embers (Pages + Top Edge)
-   - Canvas stays fully transparent (no black / grey box)
-   - Embers spawn along the right-page edge and top edge
-   ========================================================= */
-
 (() => {
   const anchor = document.getElementById("bookAnchor");
   const canvas = document.getElementById("embers");
@@ -19,8 +13,10 @@
   function resize() {
     const rect = canvas.getBoundingClientRect();
     dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
     w = Math.max(1, Math.floor(rect.width));
     h = Math.max(1, Math.floor(rect.height));
+
     canvas.width  = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -33,19 +29,19 @@
   function spawnOne() {
     const r = Math.random();
 
-    // We want embers from:
-    // - Right-page edge band
-    // - Top edge band
+    // Two bands:
+    // - Right page edge (vertical)
+    // - Top edge (horizontal)
     let x, y, vx, vy;
 
     if (r < 0.55) {
-      // RIGHT EDGE band (vertical)
+      // RIGHT EDGE band
       x  = rand(w * 0.70, w * 0.96);
       y  = rand(h * 0.22, h * 0.88);
-      vx = rand(0.05, 0.22);   // drifts slightly outward
-      vy = rand(-0.65, -0.25); // rises
+      vx = rand(0.05, 0.22);   // drift outward
+      vy = rand(-0.65, -0.25); // rise
     } else {
-      // TOP EDGE band (horizontal)
+      // TOP EDGE band
       x  = rand(w * 0.22, w * 0.86);
       y  = rand(h * 0.08, h * 0.22);
       vx = rand(-0.12, 0.12);
@@ -68,7 +64,7 @@
   function step() {
     raf = requestAnimationFrame(step);
 
-    // FULLY TRANSPARENT CLEAR — no panel
+    // Keep canvas fully transparent except for embers
     ctx.clearRect(0, 0, w, h);
 
     // Spawn a few per frame
@@ -84,11 +80,11 @@
       s.y += s.vy;
 
       const p = s.t / s.life;
-      const alpha = s.a * (1 - p);
+      const alphaBase = s.a * (1 - p);
 
       const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
+      const aFinal = alphaBase * tw;
 
-      const aFinal = alpha * tw;
       if (aFinal <= 0) {
         sparks.splice(i, 1);
         continue;
@@ -100,7 +96,7 @@
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // Hotter core
+      // Hotter core sometimes
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
