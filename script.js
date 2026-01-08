@@ -32,42 +32,43 @@
     return Math.random() * (max - min) + min;
   }
 
-  function spawn() {
-    // 0–0.75  = right page seam
-    // 0.75–1 = top bevel edge
-    const region = Math.random();
+  function spawn(){
+  const r = Math.random();
+  let x, y, vx, vy;
 
-    let x, y, vx, vy;
-
-    if (region < 0.75) {
-      // ===== RIGHT PAGE EDGE =====
-      // Nudged slightly NE (further right & higher)
-      x  = rand(w * 0.72, w * 0.86);
-      y  = rand(h * 0.26, h * 0.52);
-      vx = rand(-0.12, 0.02);
-      vy = rand(-0.55, -0.30);
-    } else {
-      // ===== TOP BEVEL EDGE =====
-      x  = rand(w * 0.40, w * 0.80);
-      y  = rand(h * 0.10, h * 0.22);
-      vx = rand(-0.18, 0.18);
-      vy = rand(-0.65, -0.32);
-    }
-
-    const s = {
-      x, y,
-      vx,
-      vy,
-      r: rand(0.9, 1.8),
-      a: rand(0.45, 0.9),
-      life: rand(32, 72),
-      t: 0,
-      tw: rand(0.004, 0.010) // twinkle speed
-    };
-
-    sparks.push(s);
-    if (sparks.length > MAX) sparks.shift();
+  if(r < 0.55){
+    // Corner hotspot (true NE corner of pages)
+    x  = rand(w * 0.70, w * 0.90);
+    y  = rand(h * 0.00, h * 0.20);
+    vx = rand(-0.15, 0.10);
+    vy = rand(-0.70, -0.35);
   }
+  else if(r < 0.85){
+    // Right sidebar (taller)
+    x  = rand(w * 0.80, w * 0.95);
+    y  = rand(h * 0.05, h * 0.85);
+    vx = rand(-0.20, 0.02);
+    vy = rand(-0.55, -0.25);
+  }
+  else {
+    // Top bevel (horizontal)
+    x  = rand(w * 0.35, w * 0.95);
+    y  = rand(h * 0.00, h * 0.15);
+    vx = rand(-0.20, 0.20);
+    vy = rand(-0.80, -0.35);
+  }
+
+  sparks.push({
+    x, y, vx, vy,
+    r: rand(0.9, 1.8),
+    a: rand(0.45, 0.9),
+    life: rand(32, 72),
+    t: 0,
+    tw: rand(0.004, 0.010)
+  });
+
+  if(sparks.length > MAX) sparks.shift();
+}
 
   function step() {
     raf = requestAnimationFrame(step);
