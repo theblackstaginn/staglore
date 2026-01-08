@@ -13,7 +13,7 @@
      (percentage of .scene-inner width/height) */
   --bookX: 56%;          /* horizontal position (0–100) */
   --bookY: 50%;          /* vertical position   (0–100) */
-  --bookWidth: 28%;      /* width as % of scene width */
+  --bookWidth: 26.5%;      /* width as % of scene width */
 
   /* Glow */
   --glowA: rgba(255,168,64,.22);
