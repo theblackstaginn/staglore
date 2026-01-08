@@ -11,8 +11,8 @@
 
   /* Book placement within the scene box
      (percentage of .scene-inner width/height) */
-  --bookX: 53%;          /* horizontal position (0–100) */
-  --bookY: 58%;          /* vertical position   (0–100) */
+  --bookX: 56%;          /* horizontal position (0–100) */
+  --bookY: 56%;          /* vertical position   (0–100) */
   --bookWidth: 28%;      /* width as % of scene width */
 
   /* Glow */
