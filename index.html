@@ -5,65 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stag Lore — Grimoire</title>
 
-  <!-- Preload key assets -->
-  <link rel="preload" as="image" href="./assets/desk-bg.png">
-  <link rel="preload" as="image" href="./assets/book-frame_01.png">
-
   <link rel="stylesheet" href="./styles.css" />
 </head>
+
 <body>
+  <!-- Fixed desk background -->
+  <div class="bg" aria-hidden="true"></div>
 
-  <!-- Desk background -->
-  <div class="desk" aria-hidden="true"></div>
+  <!-- Desk stage -->
+  <main class="stage" aria-label="The Grimoire Desk">
+    <!-- Book anchor (positions the book on the desk plane) -->
+    <button class="book-anchor" id="bookBtn" aria-label="Pick up the grimoire">
+      <!-- “Contact” shadow that pins the book to the desk -->
+      <span class="book-shadow" aria-hidden="true"></span>
 
-  <!-- Stage -->
-  <main class="stage" aria-label="Stag Lore Grimoire">
-    <section class="book-zone" aria-label="Grimoire resting place">
+      <!-- Ember field (JS populates) -->
+      <span class="embers" id="embers" aria-hidden="true"></span>
 
-      <!-- Ember layer (canvas) -->
-      <canvas id="embers" class="embers" width="900" height="600" aria-hidden="true"></canvas>
+      <!-- The book image (your existing file) -->
+      <img
+        class="book"
+        id="book"
+        src="./assets/book-frame_01.PNG"
+        alt="An antique grimoire with a stag sigil"
+        draggable="false"
+      />
 
-      <!-- Book -->
-      <button id="book" class="book" type="button" aria-label="Pick up the grimoire">
-        <span class="book-shadow" aria-hidden="true"></span>
-        <span class="book-img" aria-hidden="true"></span>
-        <span class="book-hint" aria-hidden="true">click</span>
-      </button>
-    </section>
+      <!-- tiny prompt, subtle -->
+      <span class="book-hint" aria-hidden="true">CLICK</span>
+    </button>
   </main>
 
-  <!-- Reader mode -->
-  <div id="reader" class="reader" role="dialog" aria-modal="true" aria-label="Grimoire reader" hidden>
-    <div class="reader-backdrop" data-close="1"></div>
+  <!-- Reader Mode (open-book scaffold) -->
+  <section class="reader" id="reader" aria-hidden="true">
+    <div class="reader-backdrop" id="readerClose" aria-label="Close reader"></div>
 
-    <section class="reader-panel" aria-label="Open grimoire">
-      <header class="reader-head">
+    <div class="reader-panel" role="dialog" aria-modal="true" aria-label="Grimoire Reader">
+      <div class="reader-top">
+        <button class="reader-close" id="readerX" aria-label="Close">✕</button>
         <div class="reader-title">The Grimoire</div>
-        <button class="reader-close" type="button" data-close="1" aria-label="Close reader">✕</button>
-      </header>
-
-      <div class="reader-body">
-        <!-- Placeholder spread (we’ll replace with your real pages next) -->
-        <div class="spread">
-          <div class="page left">
-            <div class="page-inner">
-              <div class="sigil">Stag Lore</div>
-              <p>Ink sleeps here, until called.</p>
-            </div>
-          </div>
-          <div class="page right">
-            <div class="page-inner">
-              <p>Next: true page-turn system.</p>
-              <p class="muted">Left/right sides will turn pages with weight.</p>
-            </div>
-          </div>
-
-          <button class="nav-zone nav-left" type="button" aria-label="Previous page"></button>
-          <button class="nav-zone nav-right" type="button" aria-label="Next page"></button>
-        </div>
       </div>
-    </section>
-  </div>
+
+      <!-- Open book surface (we’ll replace with real page-turner next) -->
+      <div class="open-book">
+        <button class="page-zone left" id="prevPage" aria-label="Previous page"></button>
+        <button class="page-zone right" id="nextPage" aria-label="Next page"></button>
+
+        <div class="pages">
+          <div class="page left-page">
+            <div class="page-inner">
+              <h2>Stag Lore</h2>
+              <p>Reader mode is live. Next step: real page turns.</p>
+              <p class="muted">Click right/left edges to turn.</p>
+            </div>
+          </div>
+
+          <div class="page right-page">
+            <div class="page-inner">
+              <h2>Page I</h2>
+              <p>We’ll bind your content here—ritual, reverence, and weight.</p>
+              <p class="muted">The pause beat will be intentional. Not lag.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intentional “beat” overlay used during page turn -->
+        <div class="beat" id="beat" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
 
   <script src="./script.js"></script>
 </body>
