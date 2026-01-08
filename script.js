@@ -1,18 +1,26 @@
 /* =========================================================
-   Stag Lore — Constant Ember Hum + Hover Surge
-   - Canvas stays transparent (no black panel)
-   - Always-on slow embers around top + right side
-   - Hover: book "breathes in" (CSS) and
-     embers get faster, denser, brighter
+   Stag Lore — Debug + Embers
+   - Adds a green outline to the hot book if JS + IDs are OK
+   - Always-on slow embers
+   - Hover: stronger embers + .book-boosted on the button
    ========================================================= */
 
 (() => {
   const anchor = document.getElementById("bookAnchor");
   const canvas = document.getElementById("embers");
-  if (!anchor || !canvas) return;
 
-  const ctx = canvas.getContext("2d", { alpha: true });
+  // HARD VISUAL DEBUG
+  if (!anchor || !canvas) {
+    // JS ran, but IDs don't match — mark the whole page red
+    document.body.style.outline = "6px solid red";
+    console.warn("Stag Lore: bookAnchor or embers not found.");
+    return;
+  }
 
+  // JS ran AND IDs are correct — mark the book button in green
+  anchor.style.outline = "3px solid lime";
+
+  const ctx = canvas.getContext("2d");
   let w = 0, h = 0, dpr = 1;
   let raf = 0;
 
@@ -20,36 +28,17 @@
   const MAX = 90;
 
   // Base + boosted “modes”
-  const BASE = {
-    spawn: 0.5,   // ~0–1 sparks per frame
-    speed: 0.45,  // slower drift
-    alphaBoost: 0.6
-  };
+  const BASE = { spawn: 0.5, speed: 0.45, alphaBoost: 0.6 };
+  const BOOST = { spawn: 2.4, speed: 1.0, alphaBoost: 1.1 };
 
-  const BOOST = {
-    spawn: 2.4,   // multiple sparks per frame
-    speed: 1.0,
-    alphaBoost: 1.1
-  };
-
-  let target = {
-    spawn: BASE.spawn,
-    speed: BASE.speed,
-    alphaBoost: BASE.alphaBoost
-  };
-
-  let current = {
-    spawn: BASE.spawn,
-    speed: BASE.speed,
-    alphaBoost: BASE.alphaBoost
-  };
+  let target = { ...BASE };
+  let current = { ...BASE };
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
     dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     w = Math.max(1, Math.floor(rect.width));
     h = Math.max(1, Math.floor(rect.height));
-
     canvas.width  = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -84,10 +73,7 @@
     }
 
     sparks.push({
-      x: x,
-      y: y,
-      vx: vx,
-      vy: vy,
+      x, y, vx, vy,
       r: rand(0.8, 2.1),
       a: rand(0.35, 0.8),
       life: rand(36, 80),
@@ -101,16 +87,15 @@
   function step() {
     raf = requestAnimationFrame(step);
 
-    // Smoothly lerp current mode toward target (breathing)
+    // Lerp toward target (breathing intensity)
     const k = 0.05;
     current.spawn      += (target.spawn      - current.spawn)      * k;
     current.speed      += (target.speed      - current.speed)      * k;
     current.alphaBoost += (target.alphaBoost - current.alphaBoost) * k;
 
-    // Transparent clear — no box
     ctx.clearRect(0, 0, w, h);
 
-    // Spawn based on current.spawn (can be fractional)
+    // Fractional spawn
     const baseSpawns = current.spawn;
     const whole = Math.floor(baseSpawns);
     const extra = baseSpawns - whole;
@@ -118,14 +103,11 @@
     for (let i = 0; i < whole; i++) spawnOne();
     if (Math.random() < extra) spawnOne();
 
-    // Update + draw
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
       s.t++;
 
-      // Apply speed factor
       const spd = current.speed;
-
       s.x += (s.vx * spd) + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06 * spd;
       s.y += (s.vy * spd);
 
@@ -139,13 +121,13 @@
         continue;
       }
 
-      // Outer ember (cool blue)
+      // Outer ember
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(118, 192, 255, " + aFinal + ")";
+      ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // Hotter core
+      // Hot core
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(
@@ -155,7 +137,7 @@
           0,
           Math.PI * 2
         );
-        ctx.fillStyle = "rgba(200, 235, 255, " + (aFinal * 0.7) + ")";
+        ctx.fillStyle = `rgba(200, 235, 255, ${aFinal * 0.7})`;
         ctx.fill();
       }
 
@@ -166,16 +148,12 @@
   }
 
   function goBase() {
-    target.spawn      = BASE.spawn;
-    target.speed      = BASE.speed;
-    target.alphaBoost = BASE.alphaBoost;
+    target = { ...BASE };
     anchor.classList.remove("book-boosted");
   }
 
   function goBoost() {
-    target.spawn      = BOOST.spawn;
-    target.speed      = BOOST.speed;
-    target.alphaBoost = BOOST.alphaBoost;
+    target = { ...BOOST };
     anchor.classList.add("book-boosted");
   }
 
@@ -185,19 +163,17 @@
   anchor.addEventListener("focusin", goBoost);
   anchor.addEventListener("focusout", goBase);
 
-  // Click placeholder for future open-book
-  anchor.addEventListener("click", function () {
+  // Click placeholder
+  anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
-    setTimeout(function () {
-      anchor.classList.remove("clicked");
-    }, 240);
+    setTimeout(() => anchor.classList.remove("clicked"), 240);
   });
 
   // Init
   resize();
   step();
 
-  window.addEventListener("resize", function () {
+  window.addEventListener("resize", () => {
     resize();
   }, { passive: true });
 })();
