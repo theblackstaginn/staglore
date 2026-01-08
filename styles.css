@@ -2,6 +2,7 @@
    Stag Lore — Grid scene + hot book overlay
    - Background is a real <img> inside .scene-inner
    - Book placement controlled by CSS vars below
+   - NO extra tilt / rotation on the hot book
    ========================================================= */
 
 :root{
@@ -14,9 +15,7 @@
   --bookY: 58%;          /* vertical position   (0–100) */
   --bookWidth: 28%;      /* width as % of scene width */
 
-  /* Tilt + glow */
-  --tiltX: 12deg;
-  --tiltZ: -7deg;
+  /* Glow */
   --glowA: rgba(255,168,64,.22);
   --glowB: rgba(255,120,40,.12);
 
@@ -87,6 +86,7 @@ body{
   left:var(--bookX);
   top:var(--bookY);
   transform:translate(-50%, -50%);
+
   width:var(--bookWidth);
   aspect-ratio: 4 / 6;   /* approximate book shape */
 
@@ -100,7 +100,7 @@ body{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Transparent book cutout */
+/* Transparent book cutout — NO extra tilt/rotation */
 .book-img{
   position:absolute;
   inset:0;
@@ -109,23 +109,21 @@ body{
   display:block;
   pointer-events:none;
 
-  transform:
-    perspective(900px)
-    rotateX(var(--tiltX))
-    rotateZ(var(--tiltZ));
-  transform-origin:50% 60%;
+  /* no perspective / rotate here; use the PNG as-is */
+  transform:none;
+  transform-origin:50% 50%;
 
   filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
 }
 
-/* Shadows to keep it grounded */
+/* Shadows to keep it grounded (no extra rotate) */
 .shadow-ambient{
   position:absolute;
   left:50%;
   top:58%;
   width:82%;
   height:28%;
-  transform:translate(-50%, -50%) rotateZ(var(--tiltZ));
+  transform:translate(-50%, -50%);
   border-radius:50%;
   background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.32), rgba(0,0,0,0) 70%);
   filter:blur(10px);
@@ -139,7 +137,7 @@ body{
   top:62%;
   width:74%;
   height:18%;
-  transform:translate(-50%, -50%) rotateZ(var(--tiltZ));
+  transform:translate(-50%, -50%);
   border-radius:50%;
   background:radial-gradient(circle at 50% 55%, rgba(0,0,0,.45), rgba(0,0,0,0) 65%);
   filter:blur(6px);
