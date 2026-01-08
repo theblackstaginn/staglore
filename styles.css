@@ -1,285 +1,280 @@
+/* =========================================================
+   Stag Lore — Desk Grimoire (CLOSED BOOK ONLY)
+   - Desk background fixed
+   - Book sits on desk (contact + ambient shadow)
+   - Hover glow + embers
+   - Intentional hover beat (hint appears after a pause)
+   - Click = pickup micro-lift (no reader mode yet)
+   ========================================================= */
+
 :root{
-  --bgDim:.35;
+  --deskDim: .30;
 
-  --bookW: min(520px, 72vw);
-  --bookAspect: 1.38; /* book image feels like 3:4-ish but slightly wider */
-  --tilt: 20deg;
+  --glow: rgba(255,150,70,.22);
+  --glow2: rgba(255,105,35,.14);
 
-  --glowA: rgba(255, 170, 60, .18);
-  --glowB: rgba(255, 110, 35, .14);
+  --text: rgba(245,240,230,.92);
 
   --ease: cubic-bezier(.2,.9,.2,1);
-  --shadow: 0 24px 55px rgba(0,0,0,.62);
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
   margin:0;
+  background:#050608;
   overflow:hidden;
-  color:#efe6d8;
-  font-family: ui-serif, Georgia, serif;
-  background:#07070a;
+  color:var(--text);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 
-/* Desk background */
-.desk{
+/* =========================
+   BACKGROUND
+   ========================= */
+.bg{
   position:fixed;
   inset:0;
-  z-index:-2;
+  z-index:-5;
   background: url("./assets/desk-bg.png") center / cover no-repeat;
   transform: translateZ(0);
 }
-.desk::after{
-  content:"";
-  position:absolute;
+
+.atmos{
+  position:fixed;
   inset:0;
-  background:
-    radial-gradient(120% 80% at 50% 30%, rgba(255,255,255,.06), transparent 60%),
-    linear-gradient(180deg, rgba(0,0,0,var(--bgDim)), rgba(0,0,0,var(--bgDim)));
-}
-
-/* Stage */
-.stage{
-  height:100%;
-  display:grid;
-  place-items:center;
-  padding: clamp(16px, 3vw, 32px);
-}
-
-/* Book zone matches “slightly off-center” resting placement */
-.book-zone{
-  position:relative;
-  width: min(1100px, 96vw);
-  height: min(700px, 86vh);
-  display:grid;
-  align-items:end;
-  justify-items:start;
-  padding: clamp(16px, 2.5vw, 34px);
-}
-
-/* Ember canvas sits over the desk area */
-.embers{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  z-index:-4;
   pointer-events:none;
-  opacity:0;
-  transition: opacity 260ms var(--ease);
-  filter: blur(.2px);
+  background:
+    radial-gradient(120% 85% at 55% 12%, rgba(255,210,160,.10), transparent 58%),
+    radial-gradient(140% 140% at 50% 55%, transparent 52%, rgba(0,0,0,.78) 100%),
+    linear-gradient(180deg, rgba(0,0,0,var(--deskDim)), rgba(0,0,0,calc(var(--deskDim) + .18)));
 }
 
-/* Book button */
-.book{
+/* =========================
+   STAGE
+   ========================= */
+.stage{
   position:relative;
+  height:100%;
+  width:100%;
+}
+
+/* =========================
+   BOOK PLACEMENT (desk plane)
+   ========================= */
+.book-anchor{
+  appearance:none;
   border:none;
   background:transparent;
   padding:0;
   cursor:pointer;
+
+  position:absolute;
+
+  /* Off-center placement; tuned for “book on desk” feel */
+  left: 18%;
+  top: 54%;
+
+  width: min(520px, 62vw);
+  aspect-ratio: 4 / 3;
+
+  transform: translateZ(0);
   outline: none;
-
-  /* perspective container so rotateX feels real */
-  transform-style: preserve-3d;
-  perspective: 1200px;
-
-  /* “resting” placement: a little left and lower */
-  margin-left: clamp(10px, 3vw, 48px);
-  margin-bottom: clamp(0px, 1.5vw, 12px);
 }
 
-/* The “book image” */
-.book-img{
-  display:block;
-  width: var(--bookW);
-  aspect-ratio: 4 / 3; /* keep consistent footprint; image itself controls feel */
-  background: url("./assets/book-frame_01.png") center / contain no-repeat;
-
-  /* Resting pose: subtle desk sit */
-  transform:
-    rotateX(0deg)
-    rotateZ(-2.2deg)
-    translateZ(0);
-
-  filter: drop-shadow(var(--shadow));
-  transition:
-    transform 620ms var(--ease),
-    filter 420ms var(--ease);
-  will-change: transform, filter;
-}
-
-/* Contact shadow under the book (helps “sitting on desk”) */
-.book-shadow{
-  content:"";
-  position:absolute;
-  left: 8%;
-  right: 6%;
-  bottom: 6%;
-  height: 22%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent 70%);
-  transform: translateZ(-1px) rotateZ(-2.2deg);
-  filter: blur(10px);
-  opacity:.75;
-  transition: opacity 420ms var(--ease), transform 620ms var(--ease);
-  pointer-events:none;
-}
-
-/* Intentional “click” hint only after rotation completes */
-.book-hint{
-  position:absolute;
-  left: 50%;
-  bottom: -10px;
-  transform: translateX(-50%);
-  font-size: 12px;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  opacity:0;
-  transition: opacity 240ms var(--ease);
-  color: rgba(240,230,216,.78);
-  text-shadow: 0 10px 25px rgba(0,0,0,.65);
-  pointer-events:none;
-}
-
-/* Hover state: glow + embers + ritual tilt (20° toward viewer) */
-.book-zone.is-hover .embers{ opacity:1; }
-
-.book-zone.is-hover .book-img{
-  transform:
-    rotateX(var(--tilt))
-    rotateZ(-2.2deg)
-    translateY(-6px)
-    translateZ(10px);
-  filter:
-    drop-shadow(0 28px 65px rgba(0,0,0,.70))
-    drop-shadow(0 0 30px var(--glowA))
-    drop-shadow(0 0 52px var(--glowB));
-}
-
-.book-zone.is-hover .book-shadow{
-  opacity:.92;
-  transform: translateZ(-1px) rotateZ(-2.2deg) scale(1.03);
-}
-
-/* “Armed” means rotation finished; now show hint */
-.book-zone.is-armed .book-hint{ opacity:.9; }
-
-/* Pickup animation before reader opens */
-.book-zone.is-picking .book-img{
-  transform:
-    rotateX(26deg)
-    rotateZ(-1.6deg)
-    translateY(-22px)
-    translateZ(40px)
-    scale(1.02);
-}
-.book-zone.is-picking .book-shadow{ opacity:.55; transform: translateZ(-1px) rotateZ(-2.2deg) scale(.98); }
-
-/* Reader */
-.reader[hidden]{ display:none; }
-.reader{
-  position:fixed;
-  inset:0;
-  z-index:60;
-}
-.reader-backdrop{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,.72);
-  backdrop-filter: blur(5px);
-}
-.reader-panel{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform: translate(-50%, -50%);
-  width: min(980px, calc(100% - 24px));
-  max-height: min(86vh, 900px);
-  overflow:hidden;
+/* Keyboard focus */
+.book-anchor:focus-visible{
+  outline: 2px solid rgba(255,220,170,.55);
+  outline-offset: 12px;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.12);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06), transparent 55%),
-    rgba(10,10,14,.72);
-  box-shadow: 0 26px 80px rgba(0,0,0,.65);
-}
-.reader-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-}
-.reader-title{
-  letter-spacing:.08em;
-  font-size: 14px;
-  text-transform: uppercase;
-  opacity:.9;
-}
-.reader-close{
-  appearance:none;
-  border:none;
-  background: transparent;
-  color:#f2e8d9;
-  font-size: 20px;
-  cursor:pointer;
-  opacity:.85;
-}
-.reader-close:hover{ opacity:1; }
-
-.reader-body{
-  padding: 14px;
-  overflow:auto;
-  max-height: calc(86vh - 54px);
-  -webkit-overflow-scrolling: touch;
 }
 
-/* Placeholder spread */
-.spread{
-  position:relative;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  border-radius: 16px;
-  padding: 12px;
-  background: rgba(0,0,0,.18);
-  border: 1px solid rgba(255,255,255,.10);
-}
-.page{
-  min-height: min(68vh, 660px);
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background:
-    radial-gradient(120% 90% at 50% 20%, rgba(255,255,255,.06), transparent 55%),
-    rgba(15,12,10,.35);
-  position:relative;
-  overflow:hidden;
-}
-.page-inner{
-  padding: 18px;
-  line-height: 1.45;
-}
-.sigil{
-  font-size: 22px;
-  letter-spacing:.06em;
-  margin-bottom: 10px;
-}
-.muted{ opacity:.75; }
+/* =========================
+   SHADOWS (this stops hovering)
+   ========================= */
 
-/* Click zones for next/prev pages (we wire behavior later) */
-.nav-zone{
+/* Tight contact shadow: where the book touches the wood */
+.shadow-contact{
   position:absolute;
-  top: 0;
-  bottom: 0;
-  width: 22%;
-  border:none;
-  background: transparent;
-  cursor:pointer;
-}
-.nav-left{ left:0; }
-.nav-right{ right:0; }
+  left: 12%;
+  top: 64%;
+  width: 76%;
+  height: 20%;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgba(0,0,0,.62), transparent 70%);
+  filter: blur(10px);
+  opacity:.90;
 
-/* Reduced motion safety */
+  /* squash to desk plane */
+  transform: perspective(1200px) rotateX(78deg) rotateZ(-2deg);
+  transform-origin: 50% 50%;
+
+  transition: opacity 520ms var(--ease), filter 520ms var(--ease), transform 520ms var(--ease);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Ambient shadow: softer spill */
+.shadow-ambient{
+  position:absolute;
+  left: 6%;
+  top: 60%;
+  width: 86%;
+  height: 30%;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgba(0,0,0,.42), transparent 78%);
+  filter: blur(18px);
+  opacity:.55;
+  transform: perspective(1200px) rotateX(78deg) rotateZ(-2deg);
+  transition: opacity 520ms var(--ease), filter 520ms var(--ease), transform 520ms var(--ease);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* =========================
+   BOOK IMAGE (locked asset)
+   ========================= */
+.book{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:auto;
+  display:block;
+  z-index:2;
+
+  /* Base resting pose: “sitting” */
+  transform-origin: 42% 72%;
+  transform:
+    perspective(1200px)
+    rotateX(10deg)
+    rotateY(-18deg)
+    rotateZ(-2deg)
+    translateY(7px);
+
+  filter:
+    drop-shadow(0 22px 22px rgba(0,0,0,.36))
+    drop-shadow(0 6px 10px rgba(0,0,0,.24));
+
+  transition: transform 520ms var(--ease), filter 520ms var(--ease);
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+/* =========================
+   EMBERS
+   ========================= */
+.embers{
+  position:absolute;
+  inset:-12% -12% -12% -12%;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* Ember particle */
+.ember{
+  position:absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  opacity: 0;
+
+  background: radial-gradient(circle,
+    rgba(255,185,85,.95),
+    rgba(255,120,40,.80),
+    transparent 70%);
+
+  animation: emberRise var(--dur, 1600ms) ease-out forwards;
+}
+
+@keyframes emberRise{
+  0%{
+    transform: translate(var(--x, 0px), var(--y, 0px)) scale(.7);
+    opacity: 0;
+  }
+  12%{ opacity: .95; }
+  100%{
+    transform: translate(calc(var(--x, 0px) + var(--dx, 0px)),
+                         calc(var(--y, 0px) - var(--lift, 90px))) scale(0);
+    opacity: 0;
+  }
+}
+
+/* =========================
+   INTENTIONAL BEAT + HINT
+   ========================= */
+.hint{
+  position:absolute;
+  left: 26%;
+  top: 86%;
+  letter-spacing: .24em;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(2px);
+  text-shadow: 0 2px 10px rgba(0,0,0,.6);
+  pointer-events:none;
+  transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+  z-index:3;
+}
+
+.book-anchor.armed .hint{
+  opacity:.52;
+  transform: translateY(0);
+}
+
+/* =========================
+   HOVER MAGIC (ritual)
+   ========================= */
+.book-anchor:hover .book,
+.book-anchor:focus-visible .book{
+  transform:
+    perspective(1200px)
+    rotateX(12deg)
+    rotateY(-34deg) /* “rotate more” */
+    rotateZ(-2deg)
+    translateY(7px);
+
+  filter:
+    drop-shadow(0 26px 26px rgba(0,0,0,.38))
+    drop-shadow(0 10px 18px rgba(0,0,0,.26))
+    drop-shadow(0 0 22px var(--glow))
+    drop-shadow(0 0 48px var(--glow2));
+}
+
+.book-anchor:hover .shadow-contact,
+.book-anchor:focus-visible .shadow-contact{
+  opacity:.70;
+  filter: blur(14px);
+}
+
+.book-anchor:hover .shadow-ambient,
+.book-anchor:focus-visible .shadow-ambient{
+  opacity:.48;
+  filter: blur(22px);
+}
+
+/* Click pickup beat (micro lift that feels deliberate) */
+.book-anchor.picking .book{
+  transform:
+    perspective(1200px)
+    rotateX(14deg)
+    rotateY(-38deg)
+    rotateZ(-2deg)
+    translateY(-8px)   /* lift */
+    translateZ(26px);  /* toward viewer */
+}
+
+.book-anchor.picking .shadow-contact{
+  opacity:.45;
+  filter: blur(18px);
+}
+.book-anchor.picking .shadow-ambient{
+  opacity:.35;
+  filter: blur(26px);
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .book-img, .book-shadow, .embers, .book-hint{ transition:none !important; }
+  .book, .shadow-contact, .shadow-ambient, .hint{ transition:none !important; }
+  .ember{ animation:none !important; }
 }
