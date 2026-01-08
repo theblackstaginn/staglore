@@ -149,11 +149,15 @@ body{
 .book-anchor .embers{
   position:absolute;
   pointer-events:none;
-  left:55%;
-  top:0%;
-  width:45%;
-  height:40%;
+
+  /* Bigger than the visible page so sparks aren't clipped */
+  left:45%;   /* start around middle of cover */
+  top:-8%;    /* extend a bit above the top edge */
+  width:55%;  /* run all the way to the right plus a little */
+  height:65%; /* cover whole right side and a bit below */
+
   transform:translate(0,0);
+  overflow:visible;  /* just in case */
 }
 
 /* Hint text */
