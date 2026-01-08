@@ -1,96 +1,149 @@
-(() => {
-  const anchor = document.getElementById("bookAnchor");
-  const canvas = document.getElementById("embers");
-  const ctx = canvas.getContext("2d", { alpha: true });
+/* =========================================================
+   Stag Lore — Layout + Book + Embers
+   - Background scene centered on page
+   - Book button positioned over background book
+   - Canvas overlays book, fully transparent
+   ========================================================= */
 
-  let w = 0, h = 0, dpr = 1;
-  let running = false;
-  let raf = 0;
-  const sparks = [];
-  const MAX = 90;
+/* ----- Base reset / page scaffold ----- */
 
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    w = rect.width;
-    h = rect.height;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-  function rand(a, b) {
-    return Math.random() * (b - a) + a;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
-  function spawn() {
-    const r = Math.random();
-    let x, y, vx, vy;
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #050608; /* dark frame around scene */
+  color: #f5f5f5;
+}
 
-    if (r < 0.6) {
-      x = rand(w*0.72, w*0.95);
-      y = rand(h*0.18, h*0.85);
-      vx = rand(0.05, 0.2);
-      vy = rand(-0.6, -0.2);
-    } else {
-      x = rand(w*0.15, w*0.85);
-      y = rand(h*0.05, h*0.18);
-      vx = rand(-0.1, 0.1);
-      vy = rand(-0.5, -0.15);
-    }
+/* Main scene container */
 
-    sparks.push({
-      x, y,
-      vx, vy,
-      r: rand(0.8, 2.2),
-      a: rand(0.4, 0.8),
-      life: rand(40, 70),
-      t: 0
-    });
+.scene {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
 
-    if (sparks.length > MAX) sparks.shift();
-  }
+.scene-inner {
+  position: relative;
+  width: min(100vw - 32px, 1200px);
+  max-width: 1200px;
+  /* Keep image crisp and scaled */
+}
 
-  function loop() {
-    raf = requestAnimationFrame(loop);
-    ctx.clearRect(0,0,w,h);
-    for (let i=0;i<3;i++) spawn();
+/* Background image (desk + book) */
 
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const s = sparks[i];
-      s.t++;
-      const p = s.t / s.life;
-      if (p >= 1) {
-        sparks.splice(i,1);
-        continue;
-      }
+.scene-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
 
-      s.x += s.vx;
-      s.y += s.vy;
-      const alpha = s.a * (1 - p);
+/* ----- Book anchor (hot book) ----- */
 
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(120,200,255,${alpha})`;
-      ctx.fill();
-    }
-  }
+/* This is your clickable / hoverable book overlay */
+.book-anchor {
+  position: absolute;
 
-  function start() {
-    if (running) return;
-    running = true;
-    resize();
-    sparks.length = 0;
-    loop();
-  }
+  /* POSITIONING:
+     These numbers are guesses based on a typical composition.
+     You’ll tweak top/left/width until it sits perfectly over the book.
+  */
+  top: 58%;
+  left: 54%;
+  width: 20%;
 
-  function stop() {
-    running = false;
-    cancelAnimationFrame(raf);
-    ctx.clearRect(0,0,w,h);
-  }
+  transform: translate(-50%, -50%);
 
-  anchor.addEventListener("mouseenter", start);
-  anchor.addEventListener("mouseleave", stop);
-  window.addEventListener("resize", resize, { passive: true });
-})();
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  display: block;
+  outline: none;
+
+  /* For stacking above background */
+  z-index: 10;
+}
+
+/* Ambient + contact shadows, purely visual if you want them */
+
+.shadow-ambient,
+.shadow-contact {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Soft big glow under book */
+.shadow-ambient {
+  filter: blur(24px);
+  opacity: 0.45;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.8), transparent 65%);
+}
+
+/* Tighter, darker contact shadow */
+.shadow-contact {
+  filter: blur(8px);
+  opacity: 0.7;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.9), transparent 70%);
+}
+
+/* Book image itself */
+
+.book-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Slight hover lift if you want a bit of magic */
+
+.book-anchor:hover .book-img,
+.book-anchor:focus-visible .book-img {
+  transform: translateY(-2px);
+  transition: transform 160ms ease-out;
+}
+
+/* ----- Embers canvas ----- */
+
+.embers {
+  position: absolute;
+  inset: 0;              /* fill the book area */
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;  /* so clicks go to the button */
+  z-index: 2;
+
+  /* Critical: no background so it stays invisible except for drawn embers */
+  background: transparent;
+}
+
+/* Optional: remove mobile tap highlight on the button */
+
+.book-anchor {
+  -webkit-tap-highlight-color: transparent;
+}
