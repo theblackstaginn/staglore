@@ -1,15 +1,42 @@
-/* LOCK THE VIEWPORT — no scroll, black frame */
+/* ==========================================================
+   Stag Lore — Fullscreen scene + hot book overlay + embers
+   - Background is a real <img> inside a fixed-height box
+   - Book placement controlled by CSS variables
+   - No scroll; black bars left/right when needed
+   ========================================================== */
+
+/* Root variables */
+:root {
+  --text: rgba(231,226,219,.92);
+  --bg-dark: #050608;
+
+  /* Book placement within the scene box
+     (percentage of .scene-inner width/height) */
+  --bookX: 55.5%;   /* horizontal center of hot book */
+  --bookY: 45.5%;   /* vertical center of hot book */
+  --bookWidth: 29%; /* width relative to scene-inner width */
+
+  /* Glow colors (if you want them later) */
+  --glowA: rgba(255,168,64,.22);
+  --glowB: rgba(255,120,40,.12);
+}
+
+/* ---------- Global layout ---------- */
+
 html,
 body {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
-  background: #000; /* the pillarbox bars */
+  overflow: hidden;     /* no scroll */
+  background: #000;     /* pillarbox bars */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
 }
 
-/* Center the scene */
+/* ---------- Scene + background ---------- */
+
 .scene {
   width: 100vw;
   height: 100vh;
@@ -18,39 +45,101 @@ body {
   justify-content: center;
 }
 
-/* Scene box matches image height */
 .scene-inner {
   position: relative;
-  height: 100vh;    /* key: image is as tall as the viewport */
+  height: 100vh; /* background image height matches viewport */
 }
 
-/* BACKGROUND IMAGE — this is the “photo” look in your pic */
+/* Background image:
+   - Full viewport height
+   - Width auto; black bars left/right if needed
+*/
 .scene-bg {
   display: block;
-  height: 100vh;    /* lock to viewport height */
-  width: auto;      /* let width expand/shrink */
-  max-width: 100vw; /* never overflow horizontally */
+  height: 100vh;
+  width: auto;
+  max-width: 100vw;
   user-select: none;
   pointer-events: none;
 }
+
+/* ---------- Hot book button ---------- */
+
 .book-anchor {
   position: absolute;
-  top: 53%;   /* tweak by 1–2% if needed */
-  left: 60%;  /* tweak by 1–2% if needed */
-  width: 24%;
+
+  /* Driven by variables so you can tweak easily */
+  left:  var(--bookX);
+  top:   var(--bookY);
+  width: var(--bookWidth);
+
   transform: translate(-50%, -50%);
+
+  padding: 0;
+  margin: 0;
   border: none;
   background: transparent;
   cursor: pointer;
+  display: block;
+  outline: none;
   z-index: 10;
+
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* Optional shadow layers under the hot book */
+
+.shadow-ambient,
+.shadow-contact {
+  position: absolute;
+  inset: 6% 4% 3% 4%;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+/* Soft ambient shadow */
+.shadow-ambient {
+  background: radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.75), transparent 70%);
+  filter: blur(22px);
+  opacity: 0.45;
+}
+
+/* Tighter contact shadow */
+.shadow-contact {
+  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.95), transparent 75%);
+  filter: blur(10px);
+  opacity: 0.7;
+}
+
+/* Hot book image itself */
+
+.book-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Slight lift on hover/focus */
+
+.book-anchor:hover .book-img,
+.book-anchor:focus-visible .book-img {
+  transform: translateY(-2px);
+  transition: transform 160ms ease-out;
+}
+
+/* ---------- Embers canvas ---------- */
 
 .embers {
   position: absolute;
-  inset: 0;
+  inset: 0;          /* fills the book-anchor box */
   width: 100%;
   height: 100%;
+  display: block;
   pointer-events: none;
-  background: transparent;
   z-index: 2;
+  background: transparent; /* only embers are visible */
 }
