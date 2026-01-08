@@ -6,7 +6,7 @@
   <title>Stag Lore</title>
   <meta name="description" content="The Black Stag Inn — Grimoire." />
 
-  <!-- Preload key images for faster first paint -->
+  <!-- Preload key images -->
   <link rel="preload" as="image" href="./assets/stag-study.png">
   <link rel="preload" as="image" href="./assets/hot-book.png">
 
@@ -14,8 +14,8 @@
 </head>
 
 <body>
-  <!-- Fixed background -->
-  <div class="bg" aria-hidden="true"></div>
+  <!-- Fixed background image (JS reads this for snap math) -->
+  <img class="bg" id="bgImg" src="./assets/stag-study.png" alt="" aria-hidden="true" />
 
   <!-- Film / dust / subtle vignette -->
   <div class="atmos" aria-hidden="true"></div>
@@ -23,13 +23,11 @@
   <main class="stage" role="main" aria-label="Stag Lore desk">
     <section class="desk-scene" aria-label="Desk scene">
 
-      <!-- The clickable / hoverable "hot book" -->
+      <!-- Hot / interactive book overlay (snapped by JS) -->
       <button class="book-anchor" id="bookAnchor" type="button" aria-label="Ancient grimoire with stag sigil">
-        <!-- Grounding shadows -->
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
-        <!-- Book cutout (transparent PNG) -->
         <img
           class="book"
           id="bookImg"
@@ -39,10 +37,8 @@
           loading="eager"
         />
 
-        <!-- Ember canvas (ONLY visible when JS toggles .embers-on) -->
         <canvas class="embers" id="embers" aria-hidden="true"></canvas>
 
-        <!-- Subtle prompt (optional) -->
         <span class="book-hint" aria-hidden="true">CLICK</span>
       </button>
 
