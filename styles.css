@@ -93,15 +93,10 @@ body{
   padding:0;
 }
 
-/* Breathing on hover / focus (JS also toggles .book-boosted) */
-.book-anchor.book-boosted{
-  transform: translate(-50%, -50%) scale(1.06);
-}
-
+/* PURE CSS “breath” on hover/focus */
+.book-anchor:hover,
 .book-anchor:focus-visible{
-  outline:2px solid rgba(118,192,255,.45);
-  outline-offset:6px;
-  border-radius:10px;
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 /* Book image */
@@ -159,8 +154,6 @@ body{
    Ember canvas
    ========================= */
 
-/* Slightly larger than the book so sparks can drift
-   without getting hard-clipped right at the leather edge */
 .embers{
   position:absolute;
   left:-6%;
