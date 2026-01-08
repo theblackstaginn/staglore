@@ -3,12 +3,16 @@
    - Background is a real <img> inside a fixed-height box
    - Book placement controlled by CSS variables
    - No scroll; black bars left/right when needed
+   - Uses JS-driven --vh for correct mobile viewport height
    ========================================================== */
 
 /* Root variables */
 :root {
   --text: rgba(231,226,219,.92);
   --bg-dark: #050608;
+
+  /* Mobile-safe viewport unit (set in JS) */
+  --vh: 1vh;
 
   /* Book placement within the scene box
      (percentage of .scene-inner width/height) */
@@ -27,27 +31,33 @@ html,
 body {
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;     /* no scroll */
-  background: #000;     /* pillarbox bars */
+  width: 100%;
+  height: calc(var(--vh) * 100); /* true viewport height */
+  overflow: hidden;              /* no scroll */
+  background: #000;              /* pillarbox bars */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
+}
+
+/* Make sure body takes the same height as html */
+body {
+  display: flex;
 }
 
 /* ---------- Scene + background ---------- */
 
 .scene {
-  width: 100vw;
-  height: 100vh;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: calc(var(--vh) * 100);
 }
 
 .scene-inner {
   position: relative;
-  height: 100vh; /* background image height matches viewport */
+  height: calc(var(--vh) * 100); /* background image height matches viewport */
 }
 
 /* Background image:
@@ -56,7 +66,7 @@ body {
 */
 .scene-bg {
   display: block;
-  height: 100vh;
+  height: calc(var(--vh) * 100);
   width: auto;
   max-width: 100vw;
   user-select: none;
@@ -143,3 +153,12 @@ body {
   z-index: 2;
   background: transparent;
 }
+
+/* ---------- Optional: small tweak on very narrow phones ---------- */
+/* If the book feels too big on tiny screens, uncomment this.
+@media (max-width: 480px) {
+  :root {
+    --bookWidth: 32%;
+  }
+}
+*/
