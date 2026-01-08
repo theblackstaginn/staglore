@@ -1,40 +1,30 @@
 /* =========================================================
-   Stag Lore — Debug + Embers
-   - Adds a green outline to the hot book if JS + IDs are OK
-   - Always-on slow embers
-   - Hover: stronger embers + .book-boosted on the button
+   Stag Lore — Always-on embers + hover “breath”
+   - Slow embers all the time
+   - Hover/focus: more embers + book scales up
+   - Canvas stays transparent (no black box)
    ========================================================= */
 
 (() => {
   const anchor = document.getElementById("bookAnchor");
   const canvas = document.getElementById("embers");
-
-  // HARD VISUAL DEBUG
-  if (!anchor || !canvas) {
-    // JS ran, but IDs don't match — mark the whole page red
-    document.body.style.outline = "6px solid red";
-    console.warn("Stag Lore: bookAnchor or embers not found.");
-    return;
-  }
-
-  // JS ran AND IDs are correct — mark the book button in green
-  anchor.style.outline = "3px solid lime";
+  if (!anchor || !canvas) return;
 
   const ctx = canvas.getContext("2d");
   let w = 0, h = 0, dpr = 1;
-  let raf = 0;
+  let rafId = 0;
 
   const sparks = [];
   const MAX = 90;
 
-  // Base + boosted “modes”
-  const BASE = { spawn: 0.5, speed: 0.45, alphaBoost: 0.6 };
-  const BOOST = { spawn: 2.4, speed: 1.0, alphaBoost: 1.1 };
+  const BASE = { spawn: 0.4, speed: 0.45, alphaBoost: 0.6 };
+  const BOOST = { spawn: 2.2, speed: 1.0, alphaBoost: 1.15 };
 
   let target = { ...BASE };
   let current = { ...BASE };
 
   function resize() {
+    // Tie ember canvas to its CSS box around the book
     const rect = canvas.getBoundingClientRect();
     dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     w = Math.max(1, Math.floor(rect.width));
@@ -53,30 +43,31 @@
     let x, y, vx, vy;
 
     if (r < 0.5) {
-      // RIGHT EDGE band
-      x  = rand(w * 0.82, w * 0.99);
-      y  = rand(h * 0.18, h * 0.88);
-      vx = rand(0.02, 0.16);
-      vy = rand(-0.70, -0.30);
+      // Right-page edge band
+      x  = rand(w * 0.78, w * 0.98);
+      y  = rand(h * 0.18, h * 0.92);
+      vx = rand(0.01, 0.12);
+      vy = rand(-0.70, -0.32);
     } else if (r < 0.8) {
-      // TOP EDGE band
-      x  = rand(w * 0.18, w * 0.88);
-      y  = rand(h * 0.06, h * 0.16);
+      // Top edge band
+      x  = rand(w * 0.16, w * 0.88);
+      y  = rand(h * 0.02, h * 0.16);
       vx = rand(-0.10, 0.10);
-      vy = rand(-0.60, -0.24);
+      vy = rand(-0.60, -0.26);
     } else {
-      // PLUME above / to the right
-      x  = rand(w * 0.60, w * 0.98);
-      y  = rand(h * -0.05, h * 0.45);
+      // Plume above/right of the book
+      x  = rand(w * 0.45, w * 0.98);
+      y  = rand(h * -0.10, h * 0.40);
       vx = rand(-0.06, 0.10);
-      vy = rand(-0.45, -0.18);
+      vy = rand(-0.48, -0.20);
     }
 
     sparks.push({
-      x, y, vx, vy,
-      r: rand(0.8, 2.1),
+      x, y,
+      vx, vy,
+      r: rand(0.8, 2.2),
       a: rand(0.35, 0.8),
-      life: rand(36, 80),
+      life: rand(38, 85),
       t: 0,
       tw: rand(0.004, 0.012)
     });
@@ -85,9 +76,9 @@
   }
 
   function step() {
-    raf = requestAnimationFrame(step);
+    rafId = requestAnimationFrame(step);
 
-    // Lerp toward target (breathing intensity)
+    // Ease current settings toward target (breathing intensity)
     const k = 0.05;
     current.spawn      += (target.spawn      - current.spawn)      * k;
     current.speed      += (target.speed      - current.speed)      * k;
@@ -108,7 +99,8 @@
       s.t++;
 
       const spd = current.speed;
-      s.x += (s.vx * spd) + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06 * spd;
+      s.x += (s.vx * spd) +
+             Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06 * spd;
       s.y += (s.vy * spd);
 
       const p = s.t / s.life;
@@ -121,13 +113,13 @@
         continue;
       }
 
-      // Outer ember
+      // Outer ember (cool blue glow)
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // Hot core
+      // Hotter core
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(
@@ -141,7 +133,8 @@
         ctx.fill();
       }
 
-      if (s.t >= s.life || s.y < -30 || s.x < -30 || s.x > w + 30) {
+      // Cull off-screen / dead
+      if (s.t >= s.life || s.y < -40 || s.x < -40 || s.x > w + 40) {
         sparks.splice(i, 1);
       }
     }
@@ -163,7 +156,7 @@
   anchor.addEventListener("focusin", goBoost);
   anchor.addEventListener("focusout", goBase);
 
-  // Click placeholder
+  // Click placeholder (future open-book magic hook)
   anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
@@ -172,8 +165,5 @@
   // Init
   resize();
   step();
-
-  window.addEventListener("resize", () => {
-    resize();
-  }, { passive: true });
+  window.addEventListener("resize", resize, { passive: true });
 })();
