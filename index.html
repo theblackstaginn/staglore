@@ -2,105 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Stag Lore</title>
-  <meta name="description" content="The Black Stag Inn — Grimoire" />
-  <meta name="theme-color" content="#0b0f14" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stag Lore — Grimoire</title>
+
+  <!-- Preload key assets -->
+  <link rel="preload" as="image" href="./assets/desk-bg.png">
+  <link rel="preload" as="image" href="./assets/book-frame_01.png">
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
-
 <body>
-  <!-- DESK SCENE -->
-  <main class="scene" aria-label="Desk scene">
-    <div class="desk" aria-hidden="true"></div>
 
-    <!-- The book lives IN the desk perspective space -->
-    <section class="desk-stage" aria-label="Book on desk">
-      <button id="book"
-        class="book"
-        type="button"
-        aria-label="Open the grimoire"
-        title="Open"
-      >
-        <span class="book-cover" aria-hidden="true"></span>
+  <!-- Desk background -->
+  <div class="desk" aria-hidden="true"></div>
 
-        <!-- subtle sigil focus ring / glow layer (hover only, delayed by JS 'ready') -->
-        <span class="sigil-glow" aria-hidden="true"></span>
+  <!-- Stage -->
+  <main class="stage" aria-label="Stag Lore Grimoire">
+    <section class="book-zone" aria-label="Grimoire resting place">
 
-        <!-- embers are generated via JS after pause beat -->
-        <span class="embers" aria-hidden="true"></span>
+      <!-- Ember layer (canvas) -->
+      <canvas id="embers" class="embers" width="900" height="600" aria-hidden="true"></canvas>
 
-        <!-- accessibility text -->
-        <span class="sr-only">Open the grimoire</span>
+      <!-- Book -->
+      <button id="book" class="book" type="button" aria-label="Pick up the grimoire">
+        <span class="book-shadow" aria-hidden="true"></span>
+        <span class="book-img" aria-hidden="true"></span>
+        <span class="book-hint" aria-hidden="true">click</span>
       </button>
-    </section>
-
-    <!-- READER OVERLAY -->
-    <section id="reader" class="reader" aria-hidden="true" aria-label="Grimoire reader">
-      <div class="reader-backdrop" data-close aria-hidden="true"></div>
-
-      <div class="reader-shell" role="dialog" aria-modal="true" aria-label="Open grimoire">
-        <header class="reader-head">
-          <div class="reader-brand">Black Stag Grimoire</div>
-
-          <div class="reader-actions">
-            <button class="rune-btn" type="button" data-close aria-label="Close grimoire">Close</button>
-          </div>
-        </header>
-
-        <!-- Open book -->
-        <div class="open-book" aria-label="Open pages">
-          <!-- Left click zone -->
-          <button class="zone zone-left" type="button" aria-label="Previous page"></button>
-          <!-- Right click zone -->
-          <button class="zone zone-right" type="button" aria-label="Next page"></button>
-
-          <div class="spine" aria-hidden="true"></div>
-
-          <article class="page page-left" aria-label="Left page">
-            <div class="page-inner">
-              <div class="page-title" id="leftTitle"></div>
-              <div class="page-body" id="leftBody"></div>
-              <div class="page-footer" id="leftFooter"></div>
-            </div>
-          </article>
-
-          <article class="page page-right" aria-label="Right page">
-            <div class="page-inner">
-              <div class="page-title" id="rightTitle"></div>
-              <div class="page-body" id="rightBody"></div>
-              <div class="page-footer" id="rightFooter"></div>
-            </div>
-
-            <!-- The flipping leaf sits above the right page -->
-            <div class="flip-leaf" id="flipLeaf" aria-hidden="true">
-              <div class="flip-front">
-                <div class="page-inner">
-                  <div class="page-title" id="flipFrontTitle"></div>
-                  <div class="page-body" id="flipFrontBody"></div>
-                  <div class="page-footer" id="flipFrontFooter"></div>
-                </div>
-              </div>
-              <div class="flip-back">
-                <div class="page-inner">
-                  <div class="page-title" id="flipBackTitle"></div>
-                  <div class="page-body" id="flipBackBody"></div>
-                  <div class="page-footer" id="flipBackFooter"></div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <footer class="reader-foot" aria-label="Reader footer">
-          <div class="page-indicator" id="pageIndicator">—</div>
-          <div class="hint">Click left/right side of the pages to turn.</div>
-        </footer>
-      </div>
     </section>
   </main>
 
-  <script src="./app.js"></script>
+  <!-- Reader mode -->
+  <div id="reader" class="reader" role="dialog" aria-modal="true" aria-label="Grimoire reader" hidden>
+    <div class="reader-backdrop" data-close="1"></div>
+
+    <section class="reader-panel" aria-label="Open grimoire">
+      <header class="reader-head">
+        <div class="reader-title">The Grimoire</div>
+        <button class="reader-close" type="button" data-close="1" aria-label="Close reader">✕</button>
+      </header>
+
+      <div class="reader-body">
+        <!-- Placeholder spread (we’ll replace with your real pages next) -->
+        <div class="spread">
+          <div class="page left">
+            <div class="page-inner">
+              <div class="sigil">Stag Lore</div>
+              <p>Ink sleeps here, until called.</p>
+            </div>
+          </div>
+          <div class="page right">
+            <div class="page-inner">
+              <p>Next: true page-turn system.</p>
+              <p class="muted">Left/right sides will turn pages with weight.</p>
+            </div>
+          </div>
+
+          <button class="nav-zone nav-left" type="button" aria-label="Previous page"></button>
+          <button class="nav-zone nav-right" type="button" aria-label="Next page"></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./script.js"></script>
 </body>
 </html>
