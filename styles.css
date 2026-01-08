@@ -1,18 +1,15 @@
 /* =========================================================
    Stag Lore — Grid scene + hot book overlay
-   - Background is a real <img> inside .scene-inner
-   - Book placement controlled by CSS vars below
    ========================================================= */
 
 :root{
   --text: rgba(231,226,219,.92);
   --bg-dark: #050608;
 
-  /* Book placement within the scene box
-     (values in "percent units", e.g. 55.5 => 55.5%) */
-  --bookX: 55.5;
-  --bookY: 45.5;
-  --bookWidth: 31;
+  /* Book placement within the scene box (0–100 %) */
+  --bookX: 55.5%;
+  --bookY: 45.5%;
+  --bookWidth: 31%;
 
   --glowA: rgba(118,192,255,.35);
   --glowB: rgba(118,192,255,.12);
@@ -28,7 +25,7 @@ body{
   background:var(--bg-dark);
   color:var(--text);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
-  overflow:hidden; /* keep static, no scroll */
+  overflow:hidden; /* static, no scroll */
 }
 
 /* =========================
@@ -38,17 +35,14 @@ body{
 .scene{
   position:relative;
   width:100%;
-  height:100vh;              /* full viewport */
+  height:100vh;
   display:flex;
-  align-items:center;        /* center vertically */
-  justify-content:center;    /* center horizontally */
+  align-items:center;
+  justify-content:center;
 }
 
 .scene-inner{
   position:relative;
-  /* 1200px max for big screens
-     100vw so it fits narrow screens
-     calc(100vh * 1.5) so 3:2 image never exceeds viewport */
   width:min(1200px, 100vw, calc(100vh * 1.5));
   aspect-ratio: 3 / 2;       /* match stag-study aspect */
   overflow:hidden;
@@ -66,7 +60,7 @@ body{
   pointer-events:none;
 }
 
-/* Optional atmosphere / vignette */
+/* Atmosphere / vignette */
 .scene-inner::after{
   content:"";
   position:absolute;
@@ -88,26 +82,29 @@ body{
   top:  calc(var(--bookY) * 1%);
   width: calc(var(--bookWidth) * 1%);
 
-  padding:0;
-  border:none;
-  background:none;
-  cursor:pointer;
-
-  /* center AND allow breathing */
   transform: translate(-50%, -50%) scale(1);
   transform-origin: 50% 60%;
-  transition: transform 0.6s ease;
-  z-index:2;
+  transition: transform 0.9s ease;
+  overflow:visible;
+  cursor:pointer;
+
+  background:none;
+  border:none;
+  padding:0;
 }
 
-/* Hover / boosted: book “breathes in” */
-.book-anchor.book-boosted,
-.book-anchor:hover,
+/* Breathing on hover / focus (JS also toggles .book-boosted) */
+.book-anchor.book-boosted{
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
 .book-anchor:focus-visible{
-  transform: translate(-50%, -50%) scale(1.10);
+  outline:2px solid rgba(118,192,255,.45);
+  outline-offset:6px;
+  border-radius:10px;
 }
 
-/* Book image sitting exactly in the anchor box */
+/* Book image */
 .book-img{
   position:absolute;
   left:50%;
@@ -118,16 +115,6 @@ body{
   display:block;
   pointer-events:none;
   filter:drop-shadow(0 18px 26px rgba(0,0,0,.55));
-  transition: filter 0.35s ease;
-}
-
-/* Slightly stronger glow while boosted */
-.book-anchor.book-boosted .book-img,
-.book-anchor:hover .book-img,
-.book-anchor:focus-visible .book-img{
-  filter:
-    drop-shadow(0 20px 30px rgba(0,0,0,.55))
-    drop-shadow(0 0 20px rgba(118,192,255,.35));
 }
 
 /* Ambient shadow (broad) */
@@ -180,10 +167,9 @@ body{
   top:-8%;
   width:112%;
   height:116%;
-
   z-index:3;
   pointer-events:none;
-  background:transparent;   /* <- no grey / black panel */
+  background:transparent;
   display:block;
 }
 
@@ -201,21 +187,14 @@ body{
   pointer-events:none;
 }
 
-/* Focus outline for keyboard users */
-.book-anchor:focus-visible{
-  outline:2px solid rgba(118,192,255,.45);
-  outline-offset:6px;
-  border-radius:10px;
-}
-
 /* =========================
    Mobile adjustments
    ========================= */
 
 @media (max-width: 760px){
   :root{
-    --bookX: 56;
-    --bookY: 48;
-    --bookWidth: 60;
+    --bookX: 56%;
+    --bookY: 48%;
+    --bookWidth: 60%;
   }
 }
