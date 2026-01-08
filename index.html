@@ -6,6 +6,7 @@
   <title>Stag Lore</title>
   <meta name="description" content="The Black Stag Inn — Grimoire." />
 
+  <!-- Preload key art -->
   <link rel="preload" as="image" href="./assets/stag-study.png">
   <link rel="preload" as="image" href="./assets/hot-book.png">
 
@@ -13,29 +14,44 @@
 </head>
 
 <body>
-  <!-- Fixed background image (JS reads this to compute cover geometry) -->
-  <img class="bg" id="bgImg" src="./assets/stag-study.png" alt="" aria-hidden="true" />
+  <!-- FIXED BACKGROUND IMAGE -->
+  <img
+    id="bgImg"
+    class="bg"
+    src="./assets/stag-study.png"
+    alt=""
+    aria-hidden="true"
+  />
 
-  <!-- Atmos -->
+  <!-- Atmos / vignette -->
   <div class="atmos" aria-hidden="true"></div>
 
   <main class="stage" role="main" aria-label="Stag Lore desk">
     <section class="desk-scene" aria-label="Desk scene">
 
-      <!-- Hot / interactive overlay book (positioned/sized by JS) -->
-      <button class="book-anchor" id="bookAnchor" type="button" aria-label="Ancient grimoire with stag sigil">
+      <!-- HOT BOOK OVERLAY (snapped by JS) -->
+      <button
+        id="bookAnchor"
+        class="book-anchor"
+        type="button"
+        aria-label="Ancient grimoire with stag sigil"
+      >
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
         <img
-          class="book"
           id="bookImg"
+          class="book"
           src="./assets/hot-book.png"
           alt="Antique grimoire with stag sigil"
           draggable="false"
         />
 
-        <canvas class="embers" id="embers" aria-hidden="true"></canvas>
+        <canvas
+          id="embers"
+          class="embers"
+          aria-hidden="true">
+        </canvas>
 
         <span class="book-hint" aria-hidden="true">CLICK</span>
       </button>
