@@ -6,7 +6,6 @@
   <title>Stag Lore</title>
   <meta name="description" content="The Black Stag Inn — Grimoire." />
 
-  <!-- Preload key art -->
   <link rel="preload" as="image" href="./assets/stag-study.png">
   <link rel="preload" as="image" href="./assets/hot-book.png">
 
@@ -14,22 +13,14 @@
 </head>
 
 <body>
-  <!-- FIXED BACKGROUND IMAGE -->
-  <img
-    id="bgImg"
-    class="bg"
-    src="./assets/stag-study.png"
-    alt=""
-    aria-hidden="true"
-  />
-
-  <!-- Atmos / vignette -->
+  <!-- Background + atmos -->
+  <div class="bg" aria-hidden="true"></div>
   <div class="atmos" aria-hidden="true"></div>
 
   <main class="stage" role="main" aria-label="Stag Lore desk">
     <section class="desk-scene" aria-label="Desk scene">
 
-      <!-- HOT BOOK OVERLAY (snapped by JS) -->
+      <!-- Hot / interactive book overlay -->
       <button
         id="bookAnchor"
         class="book-anchor"
