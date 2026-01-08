@@ -45,49 +45,52 @@
   }
 
   // === EMBER SPAWN LOGIC (SLANTED 7-SHAPE) ===
-  function spawnOne() {
-    const t = Math.random();
-    let nx, ny;
+  // === EMBER SPAWN LOGIC (RIGHT-EDGE 7-SHAPE) ===
+function spawnOne() {
+  const t = Math.random();
+  let nx, ny;
 
-    if (Math.random() < 0.6) {
-      // Top bar of the 7
-      nx = 0.10 + 0.80 * t;
-      ny = 0.15;
-    } else {
-      // Slanted leg inward
-      const t2 = t;
-      nx = 0.90 + (0.65 - 0.90) * t2;
-      ny = 0.15 + (0.70 - 0.15) * t2;
-    }
-
-    // Mild jitter for realism
-    nx += (Math.random() - 0.5) * 0.04;
-    ny += (Math.random() - 0.5) * 0.04;
-
-    // Clamp normalized UV
-    nx = Math.min(0.98, Math.max(0.02, nx));
-    ny = Math.min(0.98, Math.max(0.02, ny));
-
-    // === MAP NORMALIZED SHAPE INTO THE FIXED SPAWN BOX ===
-    const x = (spawnBox.x * w) + (nx * spawnBox.w * w);
-    const y = (spawnBox.y * h) + (ny * spawnBox.h * h);
-
-    // Ember motion
-    const vx = (Math.random() - 0.5) * 0.15;
-    const vy = rand(-0.65, -0.40);
-
-    sparks.push({
-      x, y,
-      vx, vy,
-      r: rand(0.8, 2.2),
-      a: rand(0.4, 0.9),
-      life: rand(32, 70),
-      t: 0,
-      tw: rand(0.004, 0.012)
-    });
-
-    if (sparks.length > MAX) sparks.shift();
+  if (Math.random() < 0.6) {
+    // TOP BAR – short, only on the right side of the book
+    // from about 60% → 95% across, near the top edge
+    nx = 0.60 + 0.35 * t;  // 0.60 → 0.95
+    ny = 0.15;             // slight offset down from very top
+  } else {
+    // RIGHT LEG – almost vertical, hugging the right edge
+    // start near top-right corner and fall mostly straight down
+    const t2 = t;
+    nx = 0.90 + (0.84 - 0.90) * t2; // 0.90 → 0.84 (small inward lean)
+    ny = 0.15 + (0.80 - 0.15) * t2; // 0.15 → 0.80 (down the edge)
   }
+
+  // Small jitter so it doesn't look ruler-straight
+  nx += (Math.random() - 0.5) * 0.02;
+  ny += (Math.random() - 0.5) * 0.02;
+
+  // Clamp normalized UV inside logical shape
+  nx = Math.min(0.98, Math.max(0.02, nx));
+  ny = Math.min(0.98, Math.max(0.02, ny));
+
+  // Map into fixed spawnBox inside the canvas
+  const x = (spawnBox.x * w) + (nx * spawnBox.w * w);
+  const y = (spawnBox.y * h) + (ny * spawnBox.h * h);
+
+  // Ember motion (unchanged)
+  const vx = (Math.random() - 0.5) * 0.15;
+  const vy = rand(-0.65, -0.40);
+
+  sparks.push({
+    x, y,
+    vx, vy,
+    r: rand(0.8, 2.2),
+    a: rand(0.4, 0.9),
+    life: rand(32, 70),
+    t: 0,
+    tw: rand(0.004, 0.012)
+  });
+
+  if (sparks.length > MAX) sparks.shift();
+}
 
   function step() {
     raf = requestAnimationFrame(step);
