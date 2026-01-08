@@ -29,35 +29,32 @@
   function spawnOne() {
   const r = Math.random();
 
-  // We want:
-  // - A tight vertical band hugging the RIGHT PAGE EDGE / side pages
-  // - A thin horizontal band just ABOVE the TOP EDGE
   let x, y, vx, vy;
 
   if (r < 0.6) {
     // ======================================
-    // RIGHT EDGE band (side pages / rim)
+    // RIGHT EDGE band — tighter & a bit higher
     // ======================================
-    // x: from ~86% of book width to a little off the right edge
-    x  = rand(w * 0.86, w * 1.04);
-    // y: mostly along the right side of the book, not way below the base
-    y  = rand(h * 0.32, h * 0.88);
+    // Hug the page edge and just off the right side
+    x  = rand(w * 0.90, w * 1.06);
+    // Focus mostly from mid-book down to just above the base
+    y  = rand(h * 0.35, h * 0.85);
 
-    // Drift outward and upward
-    vx = rand(0.03, 0.12);    // gentle push away from the book
-    vy = rand(-0.60, -0.22);  // rise
+    // Gentle outward + upward drift
+    vx = rand(0.03, 0.10);
+    vy = rand(-0.65, -0.28);
   } else {
     // ======================================
-    // TOP EDGE band (just above the cover)
+    // TOP EDGE band — right on the lip + early plume
     // ======================================
-    // x: span across the top 60–70% of the cover
-    x  = rand(w * 0.22, w * 0.78);
-    // y: very close to the top edge, slightly above it
-    y  = rand(h * 0.02, h * 0.11);
+    // Across the main width of the cover
+    x  = rand(w * 0.25, w * 0.78);
+    // Very close to the top edge, slightly below to slightly above
+    y  = rand(h * 0.04, h * 0.16);
 
-    // Rise with a little side wobble
+    // Mostly upward, small sideways wobble
     vx = rand(-0.10, 0.10);
-    vy = rand(-0.55, -0.20);
+    vy = rand(-0.70, -0.35);
   }
 
   sparks.push({
