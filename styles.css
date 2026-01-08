@@ -1,31 +1,16 @@
 /* =========================================================
-   Stag Lore — Desk + Hot Book (Phase 1) (FIXED)
-   - Background: stag-study.png (world)
-   - Hot object: hot-book.png (transparent cutout)
-   - Embers canvas NEVER shows as a black rectangle:
-     it is only visible when JS adds .embers-on
-   - Hot-book alignment dials added (hotX/hotY/hotScale/hotRotate)
+   Stag Lore — Desk + Book (SNAP SYSTEM)
+   - Background is an <img> with object-fit: cover
+   - Book anchor is positioned/sized by JS using Photopea map
+   - Hot book overlays the baked book perfectly
    ========================================================= */
 
 :root{
   --text: rgba(231,226,219,.92);
 
-  /* Scene tuning */
-  --sceneMax: 1200px;
-
-  /* Book placement (anchor position in the scene) */
-  --bookLeft: 23%;
-  --bookTop: 63%;
-  --bookWidth: min(460px, 48vw);
-
-  /* Slight rotation only (NO rotateX — PNG already has perspective) */
+  /* Book 3D tuning (visual only; position handled by JS) */
+  --tiltX: 12deg;
   --tiltZ: -7deg;
-
-  /* Hot-book calibration (to cover baked-in book perfectly) */
-  --hotX: 0px;          /* left/right */
-  --hotY: 0px;          /* up/down */
-  --hotScale: 1.00;     /* size */
-  --hotRotate: 0deg;    /* micro-rotate */
 
   /* Glow */
   --glowA: rgba(255, 168, 64, .22);
@@ -48,14 +33,19 @@ body{
 }
 
 /* =========================
-   BACKGROUND (fixed)
+   BACKGROUND (fixed image)
    ========================= */
 .bg{
   position:fixed;
   inset:0;
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  object-position: center;
   z-index:-5;
-  background: url("./assets/stag-study.png") center / cover no-repeat;
   transform: translateZ(0);
+  user-select:none;
+  pointer-events:none;
 }
 
 /* Atmos overlay (dust / vignette) */
@@ -68,11 +58,10 @@ body{
     radial-gradient(120% 90% at 50% 10%, rgba(255,255,255,var(--v1)), transparent 60%),
     radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,var(--v2)) 100%),
     linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
-  mix-blend-mode: normal;
 }
 
 /* =========================
-   STAGE LAYOUT
+   STAGE
    ========================= */
 .stage{
   position:relative;
@@ -83,20 +72,14 @@ body{
 .desk-scene{
   position:relative;
   height:100%;
-  width:min(var(--sceneMax), 100%);
-  margin:0 auto;
+  width:100%;
 }
 
 /* =========================
-   BOOK ANCHOR
+   BOOK ANCHOR (snapped by JS)
    ========================= */
 .book-anchor{
-  position:absolute;
-  left:var(--bookLeft);
-  top:var(--bookTop);
-  transform: translate(-50%, -50%);
-  width: var(--bookWidth);
-  aspect-ratio: 4 / 3;
+  position:absolute; /* JS sets left/top/width/height */
   padding:0;
   border:0;
   background:transparent;
@@ -107,25 +90,22 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Book image (transparent PNG cutout) */
+/* Book image (fills anchor; visual transform only) */
 .book{
   position:absolute;
-  left:50%;
-  top:50%;
-  width: 100%;
-  height:auto;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  pointer-events:none;
 
   transform:
-    translate(-50%, -50%)
-    translate(var(--hotX), var(--hotY))
-    rotateZ(calc(var(--tiltZ) + var(--hotRotate)))
-    scale(var(--hotScale));
-
-  transform-origin: 50% 62%;
-  display:block;
+    perspective(900px)
+    rotateX(var(--tiltX))
+    rotateZ(var(--tiltZ));
+  transform-origin: 50% 60%;
 
   filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
-  pointer-events:none;
 }
 
 /* Ambient shadow (broad, soft) */
@@ -143,11 +123,10 @@ body{
   );
   filter: blur(10px);
   opacity: .65;
-  z-index:9;
   pointer-events:none;
 }
 
-/* Contact shadow (tight) — kills hovering */
+/* Contact shadow (tight; kills “hovering”) */
 .shadow-contact{
   position:absolute;
   left:50%;
@@ -162,11 +141,10 @@ body{
   );
   filter: blur(6px);
   opacity: .92;
-  z-index:9;
   pointer-events:none;
 }
 
-/* Embers canvas sits above book — INVISIBLE unless JS enables */
+/* Embers canvas sits above book */
 .embers{
   position:absolute;
   inset:0;
@@ -174,18 +152,11 @@ body{
   height:100%;
   z-index:12;
   pointer-events:none;
-
   opacity:0;
-  background: transparent;
-  transition: opacity .18s ease;
+  transition: opacity .22s ease;
 }
 
-/* Only show canvas when JS says so */
-.book-anchor.embers-on .embers{
-  opacity:1;
-}
-
-/* Optional hint text */
+/* Optional hint */
 .book-hint{
   position:absolute;
   left:50%;
@@ -199,7 +170,12 @@ body{
   pointer-events:none;
 }
 
-/* Hover / focus glow (book only; canvas visibility handled by JS) */
+/* Hover / focus: ritual wake */
+.book-anchor:hover .embers,
+.book-anchor:focus-visible .embers{
+  opacity:1;
+}
+
 .book-anchor:hover .book,
 .book-anchor:focus-visible .book{
   filter:
@@ -208,38 +184,14 @@ body{
     drop-shadow(0 0 46px var(--glowB));
 }
 
-.book-anchor:hover .shadow-contact,
-.book-anchor:focus-visible .shadow-contact{
-  opacity: .98;
-}
-
 .book-anchor:focus-visible{
   outline: 2px solid rgba(255, 190, 120, .22);
   outline-offset: 8px;
   border-radius: 18px;
 }
 
-/* Click pulse placeholder (JS toggles .clicked) */
-.book-anchor.clicked .book{
-  filter:
-    drop-shadow(0 18px 26px rgba(0,0,0,.52))
-    drop-shadow(0 0 26px rgba(255, 175, 90, .28))
-    drop-shadow(0 0 60px rgba(255, 120, 40, .16));
-}
-
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   .embers{ transition:none; }
   .book-anchor:hover .book{ filter: drop-shadow(0 18px 26px rgba(0,0,0,.52)); }
-}
-
-/* Small screens: nudge placement */
-@media (max-width: 760px){
-  :root{
-    --bookLeft: 36%;
-    --bookTop: 66%;
-    --bookWidth: min(420px, 78vw);
-    --tiltZ: -6deg;
-  }
-  body{ overflow:hidden; }
 }
