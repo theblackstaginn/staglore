@@ -1,5 +1,7 @@
 /* =========================================================
-   Stag Lore — Desk + Book (Phase 1)
+   Stag Lore — Desk + Hot Book (Phase 1)
+   - Background: stag-study.png (the world)
+   - Hot object: hot-book.png (transparent cutout)
    - ONLY: book sitting on desk with ember glow on hover
    - No open-book mode yet
    - Paths are lowercase (GitHub Pages is case-sensitive)
@@ -24,8 +26,6 @@
   /* Glow */
   --glowA: rgba(255, 168, 64, .22);
   --glowB: rgba(255, 120, 40, .12);
-  --ember: rgba(255, 160, 70, .75);
-  --ember2: rgba(255, 210, 160, .35);
 
   /* Vignette strength */
   --v1: .08;
@@ -49,7 +49,7 @@ body{
   position:fixed;
   inset:0;
   z-index:-5;
-  background: url("./assets/desk-bg.png") center / cover no-repeat;
+  background: url("./assets/stag-study.png") center / cover no-repeat;
   transform: translateZ(0);
 }
 
@@ -100,12 +100,11 @@ body{
   /* HARD LOCK layering so book can’t disappear */
   z-index:10;
 
-  /* keep it stable */
   user-select:none;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Book image */
+/* Book image (transparent PNG cutout) */
 .book{
   position:absolute;
   left:50%;
@@ -118,12 +117,11 @@ body{
     rotateX(var(--tiltX))
     rotateZ(var(--tiltZ))
     translateY(var(--lift));
-  transform-origin: 50% 60%;
+  transform-origin: 50% 62%;
   display:block;
 
-  /* Make it sit “in” the scene */
-  filter:
-    drop-shadow(0 18px 26px rgba(0,0,0,.50));
+  /* Depth + seating */
+  filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
 
   /* no accidental dragging */
   pointer-events:none;
@@ -216,6 +214,14 @@ body{
   outline: 2px solid rgba(255, 190, 120, .22);
   outline-offset: 8px;
   border-radius: 18px;
+}
+
+/* Click pulse placeholder (JS toggles .clicked) */
+.book-anchor.clicked .book{
+  filter:
+    drop-shadow(0 18px 26px rgba(0,0,0,.52))
+    drop-shadow(0 0 26px rgba(255, 175, 90, .28))
+    drop-shadow(0 0 60px rgba(255, 120, 40, .16));
 }
 
 /* Reduced motion */
