@@ -1,142 +1,35 @@
-/* =========================================================
-   Stag Lore — Layout + Background + Hot Book + Embers
-   - Background study centered on page
-   - Hot book overlays painted book
-   - Embers canvas pinned to book bounds
-   ========================================================= */
-
-/* ---------- Base reset ---------- */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
+/* LOCK THE VIEWPORT — no scroll, black frame */
 html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000; /* the pillarbox bars */
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background-color: #050608; /* dark frame around the scene */
-  color: #f5f5f5;
-}
-
-/* ---------- Scene container ---------- */
-
+/* Center the scene */
 .scene {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
 }
 
+/* Scene box matches image height */
 .scene-inner {
   position: relative;
-  width: min(100vw - 32px, 1200px);
-  max-width: 1200px;
+  height: 100vh;    /* key: image is as tall as the viewport */
 }
 
-/* Background image (desk + book) */
-
+/* BACKGROUND IMAGE — this is the “photo” look in your pic */
 .scene-bg {
   display: block;
-  width: 100%;
-  height: auto;
+  height: 100vh;    /* lock to viewport height */
+  width: auto;      /* let width expand/shrink */
+  max-width: 100vw; /* never overflow horizontally */
   user-select: none;
   pointer-events: none;
-}
-
-/* ---------- Hot book button ---------- */
-
-.book-anchor {
-  position: absolute;
-
-  /* These are the aligned values from the last “it’s covering and looks decent” state:
-     - Slightly larger than bg book
-     - Nudged up and a bit right
-     Adjust by small percentages if you need micro-alignment.
-  */
-  top: 59%;
-  left: 56%;
-  width: 26%;
-
-  transform: translate(-50%, -50%);
-
-  padding: 0;
-  margin: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-
-  display: block;
-  outline: none;
-
-  z-index: 10;
-
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Optional shadow layers under the book */
-
-.shadow-ambient,
-.shadow-contact {
-  position: absolute;
-  inset: 8% 6% 2% 6%; /* smaller than full to keep it under the book */
-  pointer-events: none;
-  border-radius: 999px;
-}
-
-/* Soft ambient glow */
-
-.shadow-ambient {
-  background: radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.7), transparent 70%);
-  filter: blur(24px);
-  opacity: 0.45;
-}
-
-/* Tighter contact shadow */
-
-.shadow-contact {
-  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.9), transparent 75%);
-  filter: blur(10px);
-  opacity: 0.7;
-}
-
-/* Book image */
-
-.book-img {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Slight lift on hover/focus for a bit of magic */
-
-.book-anchor:hover .book-img,
-.book-anchor:focus-visible .book-img {
-  transform: translateY(-2px);
-  transition: transform 160ms ease-out;
-}
-
-/* ---------- Embers canvas ---------- */
-
-.embers {
-  position: absolute;
-  inset: 0;          /* Fill the book-anchor box */
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none; /* Allow clicks to hit the button */
-  z-index: 2;
-  background: transparent; /* No box, only embers */
 }
