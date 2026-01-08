@@ -35,7 +35,7 @@
     const x = rand(w * 0.38, w * 0.62);
     const y = rand(h * 0.62, h * 0.78);
 
-    const s = {
+    sparks.push({
       x, y,
       vx: rand(-0.18, 0.18),
       vy: rand(-0.85, -0.35),
@@ -44,8 +44,8 @@
       life: rand(28, 64),
       t: 0,
       tw: rand(0.004, 0.012) // twinkle
-    };
-    sparks.push(s);
+    });
+
     if (sparks.length > MAX) sparks.shift();
   }
 
@@ -57,8 +57,7 @@
     ctx.fillRect(0, 0, w, h);
 
     // Spawn a few per frame
-    const spawns = 2;
-    for (let i = 0; i < spawns; i++) spawn();
+    for (let i = 0; i < 2; i++) spawn();
 
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
@@ -75,15 +74,13 @@
       // Twinkle brightness
       const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
 
-      // Draw ember
+      // Ember
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-
-      // Warm ember palette (no hard-coded CSS vars here; keep it simple)
       ctx.fillStyle = `rgba(255, 165, 80, ${alpha * tw})`;
       ctx.fill();
 
-      // Tiny hot core sometimes
+      // Hot core sometimes
       if (Math.random() < 0.22) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.4, s.r * 0.42), 0, Math.PI * 2);
@@ -91,7 +88,7 @@
         ctx.fill();
       }
 
-      // Remove dead
+      // Cull
       if (s.t >= s.life || s.y < -10 || s.x < -20 || s.x > w + 20) {
         sparks.splice(i, 1);
       }
@@ -112,7 +109,7 @@
     running = false;
     cancelAnimationFrame(raf);
     raf = 0;
-    // Clear after a beat so it doesn’t “pop” harshly
+    // Clear after a beat so it doesn’t “pop”
     setTimeout(() => {
       if (!running) ctx.clearRect(0, 0, w, h);
     }, 120);
@@ -120,7 +117,6 @@
 
   // Click placeholder (no open-book mode yet)
   anchor.addEventListener("click", () => {
-    // Intentional beat without “lag”:
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
   });
