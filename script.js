@@ -9,22 +9,15 @@
 
   const sparks = [];
   const MAX = 80;
-  
-  // physical spawn box inside the embers canvas
-const spawnBox = {
-  x: 0.20,   // 20% from left of canvas
-  y: 0.00,   // at top of canvas
-  w: 0.60,   // 60% of canvas width
-  h: 0.50    // 50% of canvas height
-};
 
-// region inside the expanded canvas where we want the 7-shape to appear
-const spawnOffset = {
-  x0: 0.10,  // left inset (10%)
-  x1: 0.90,  // right inset (90%)
-  y0: 0.00,  // top inset (0%)
-  y1: 0.60   // bottom inset (60% down the book)
-};
+  // === FIXED-SIZE SPAWN BOX INSIDE THE EXPANDED CANVAS ===
+  // This prevents the 7-shape from scaling when the canvas is enlarged.
+  const spawnBox = {
+    x: 0.20, // left offset (fraction of canvas width)
+    y: 0.00, // top offset
+    w: 0.60, // width fraction of canvas for the 7-shape
+    h: 0.50  // height fraction of canvas for the 7-shape
+  };
 
   function rand(min, max) {
     return Math.random() * (max - min) + min;
@@ -33,7 +26,7 @@ const spawnOffset = {
   function resize() {
     let rect = canvas.getBoundingClientRect();
 
-    // Fallback if rect returns zero (can happen on init)
+    // fallback if zero (can happen during init or hidden layout)
     if (rect.width === 0 || rect.height === 0) {
       rect = {
         width: canvas.offsetWidth || anchor.offsetWidth,
@@ -57,27 +50,27 @@ const spawnOffset = {
     let nx, ny;
 
     if (Math.random() < 0.6) {
-      // TOP BAR of 7
-      nx = 0.10 + 0.80 * t; // 10% → 90%
-      ny = 0.15;            // near top edge
+      // Top bar of the 7
+      nx = 0.10 + 0.80 * t;
+      ny = 0.15;
     } else {
-      // SLANTED LEG (inward lean like a real 7)
-      // from (0.90, 0.15) → (0.65, 0.70)
+      // Slanted leg inward
       const t2 = t;
-      nx = 0.90 + (0.65 - 0.90) * t2; // 90% → 65%
-      ny = 0.15 + (0.70 - 0.15) * t2; // 15% → 70%
+      nx = 0.90 + (0.65 - 0.90) * t2;
+      ny = 0.15 + (0.70 - 0.15) * t2;
     }
 
-    // Jitter for realism
+    // Mild jitter for realism
     nx += (Math.random() - 0.5) * 0.04;
     ny += (Math.random() - 0.5) * 0.04;
 
-    // Clamp to canvas area
+    // Clamp normalized UV
     nx = Math.min(0.98, Math.max(0.02, nx));
     ny = Math.min(0.98, Math.max(0.02, ny));
 
-    const x = (spawnOffset.x0 + nx * (spawnOffset.x1 - spawnOffset.x0)) * w;
-    const y = (spawnOffset.y0 + ny * (spawnOffset.y1 - spawnOffset.y0)) * h;
+    // === MAP NORMALIZED SHAPE INTO THE FIXED SPAWN BOX ===
+    const x = (spawnBox.x * w) + (nx * spawnBox.w * w);
+    const y = (spawnBox.y * h) + (ny * spawnBox.h * h);
 
     // Ember motion
     const vx = (Math.random() - 0.5) * 0.15;
@@ -100,14 +93,14 @@ const spawnOffset = {
     raf = requestAnimationFrame(step);
     ctx.clearRect(0, 0, w, h);
 
-    // Spawn a few per frame
+    // spawn a few per frame
     for (let i = 0; i < 3; i++) spawnOne();
 
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
       s.t++;
 
-      // Drift + swirl
+      // drift + swirl
       s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06;
       s.y += s.vy;
 
@@ -121,13 +114,13 @@ const spawnOffset = {
         continue;
       }
 
-      // Outer ember
+      // outer ember
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // Hot core
+      // hot core
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
@@ -135,7 +128,7 @@ const spawnOffset = {
         ctx.fill();
       }
 
-      // Kill off-screen or dead
+      // bounds kill
       if (s.t >= s.life || s.y < -12 || s.x < -12 || s.x > w + 12) {
         sparks.splice(i, 1);
       }
@@ -161,13 +154,13 @@ const spawnOffset = {
     }, 120);
   }
 
-  // Button click placeholder
+  // click placeholder
   anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
   });
 
-  // Hover/focus triggers
+  // hover/focus triggers
   anchor.addEventListener("mouseenter", start);
   anchor.addEventListener("mouseleave", stop);
   anchor.addEventListener("focusin", start);
