@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stag Lore</title>
 
-  <!-- Preload background + hot book for smoother first paint -->
+  <!-- Preload key images -->
   <link rel="preload" href="./assets/stag-study.png" as="image">
   <link rel="preload" href="./assets/hot-book.png" as="image">
 
@@ -15,11 +15,11 @@
 <body>
   <main class="scene">
     <div class="scene-inner">
-      <!-- Full background study image (fills height, black bars left/right) -->
+      <!-- Background study image (fills height, letterboxed horizontally) -->
       <img
         class="scene-bg"
         src="./assets/stag-study.png"
-        alt="Stag grimoire on a wooden desk with candles and artifacts"
+        alt="Stag grimoire in a study full of artifacts"
         draggable="false"
       />
 
@@ -28,7 +28,7 @@
         <span class="shadow-ambient"></span>
         <span class="shadow-contact"></span>
 
-        <!-- Foreground hot-book image that covers the painted book -->
+        <!-- Foreground hot-book image -->
         <img
           class="book-img"
           src="./assets/hot-book.png"
