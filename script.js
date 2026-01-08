@@ -32,34 +32,33 @@
     return Math.random() * (max - min) + min;
   }
 
-  function spawn(){
+  function spawn() {
   const r = Math.random();
   let x, y, vx, vy;
 
-  if(r < 0.55){
-    // Corner hotspot (true NE corner of pages)
-    x  = rand(w * 0.70, w * 0.90);
-    y  = rand(h * 0.00, h * 0.20);
-    vx = rand(-0.15, 0.10);
-    vy = rand(-0.70, -0.35);
-  }
-  else if(r < 0.85){
-    // Right sidebar (taller)
-    x  = rand(w * 0.80, w * 0.95);
-    y  = rand(h * 0.05, h * 0.85);
-    vx = rand(-0.20, 0.02);
-    vy = rand(-0.55, -0.25);
-  }
-  else {
-    // Top bevel (horizontal)
-    x  = rand(w * 0.35, w * 0.95);
-    y  = rand(h * 0.00, h * 0.15);
+  if (r < 0.25) {
+    // 25% — hot corner (keeps that nice focal burst)
+    x  = rand(w * 0.70, w * 0.95);  // near right edge
+    y  = rand(h * 0.00, h * 0.25);  // very top
+    vx = rand(-0.18, 0.10);
+    vy = rand(-0.75, -0.35);
+  } else if (r < 0.65) {
+    // 40% — FULL right side band
+    x  = rand(w * 0.80, w * 0.97);  // hugging right edge
+    y  = rand(h * 0.05, h * 0.95);  // almost full height
+    vx = rand(-0.22, 0.02);
+    vy = rand(-0.60, -0.25);
+  } else {
+    // 35% — FULL top edge band
+    x  = rand(w * 0.05, w * 0.98);  // almost full width of canvas
+    y  = rand(h * 0.00, h * 0.18);  // thin strip along top
     vx = rand(-0.20, 0.20);
-    vy = rand(-0.80, -0.35);
+    vy = rand(-0.85, -0.40);
   }
 
   sparks.push({
-    x, y, vx, vy,
+    x, y,
+    vx, vy,
     r: rand(0.9, 1.8),
     a: rand(0.45, 0.9),
     life: rand(32, 72),
@@ -67,7 +66,7 @@
     tw: rand(0.004, 0.010)
   });
 
-  if(sparks.length > MAX) sparks.shift();
+  if (sparks.length > MAX) sparks.shift();
 }
 
   function step() {
