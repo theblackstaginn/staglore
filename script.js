@@ -9,6 +9,14 @@
 
   const sparks = [];
   const MAX = 80;
+  
+  // physical spawn box inside the embers canvas
+const spawnBox = {
+  x: 0.20,   // 20% from left of canvas
+  y: 0.00,   // at top of canvas
+  w: 0.60,   // 60% of canvas width
+  h: 0.50    // 50% of canvas height
+};
 
 // region inside the expanded canvas where we want the 7-shape to appear
 const spawnOffset = {
