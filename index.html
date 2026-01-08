@@ -17,7 +17,7 @@
   <main class="scene" role="main" aria-label="Stag Lore desk">
     <div class="scene-inner">
 
-      <!-- Background scene -->
+      <!-- Background image -->
       <img
         src="./assets/stag-study.png"
         alt="Wizard's study with books, candle and alchemy tools"
@@ -32,11 +32,11 @@
         type="button"
         aria-label="Ancient grimoire with stag sigil"
       >
-        <!-- Grounding shadows -->
+        <!-- Shadows to ground the book -->
         <span class="shadow-ambient" aria-hidden="true"></span>
         <span class="shadow-contact" aria-hidden="true"></span>
 
-        <!-- Cutout of the book + stand (PNG with transparency) -->
+        <!-- Transparent cutout of the book on stand -->
         <img
           id="bookImg"
           class="book-img"
@@ -45,7 +45,7 @@
           draggable="false"
         />
 
-        <!-- Ember canvas (sits over the book) -->
+        <!-- Ember canvas -->
         <canvas
           id="embers"
           class="embers"
