@@ -2,14 +2,16 @@
    Stag Lore — Constant Ember Hum + Hover Surge
    - Canvas stays transparent (no black panel)
    - Always-on slow embers around top + right side
-   - Hover: book "breathes in" (handled in CSS) and
+   - Hover: book "breathes in" (CSS) and
      embers get faster, denser, brighter
    ========================================================= */
 
 (() => {
-  const anchor  = document.getElementById("bookAnchor");
-  const canvas  = document.getElementById("embers");
-  const ctx     = canvas.getContext("2d", { alpha: true });
+  const anchor = document.getElementById("bookAnchor");
+  const canvas = document.getElementById("embers");
+  if (!anchor || !canvas) return;
+
+  const ctx = canvas.getContext("2d", { alpha: true });
 
   let w = 0, h = 0, dpr = 1;
   let raf = 0;
@@ -19,9 +21,9 @@
 
   // Base + boosted “modes”
   const BASE = {
-    spawn: 0.7,   // ~0–1 sparks per frame
+    spawn: 0.5,   // ~0–1 sparks per frame
     speed: 0.45,  // slower drift
-    alphaBoost: 0.65
+    alphaBoost: 0.6
   };
 
   const BOOST = {
@@ -30,8 +32,17 @@
     alphaBoost: 1.1
   };
 
-  let target = { ...BASE };
-  let current = { ...BASE };
+  let target = {
+    spawn: BASE.spawn,
+    speed: BASE.speed,
+    alphaBoost: BASE.alphaBoost
+  };
+
+  let current = {
+    spawn: BASE.spawn,
+    speed: BASE.speed,
+    alphaBoost: BASE.alphaBoost
+  };
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -73,10 +84,10 @@
     }
 
     sparks.push({
-      x,
-      y,
-      vx,
-      vy,
+      x: x,
+      y: y,
+      vx: vx,
+      vy: vy,
       r: rand(0.8, 2.1),
       a: rand(0.35, 0.8),
       life: rand(36, 80),
@@ -131,7 +142,7 @@
       // Outer ember (cool blue)
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
+      ctx.fillStyle = "rgba(118, 192, 255, " + aFinal + ")";
       ctx.fill();
 
       // Hotter core
@@ -144,7 +155,7 @@
           0,
           Math.PI * 2
         );
-        ctx.fillStyle = `rgba(200, 235, 255, ${aFinal * 0.7})`;
+        ctx.fillStyle = "rgba(200, 235, 255, " + (aFinal * 0.7) + ")";
         ctx.fill();
       }
 
@@ -154,15 +165,17 @@
     }
   }
 
-  // --- Interaction: we NEVER stop the loop, just change target mode ---
-
   function goBase() {
-    target = { ...BASE };
+    target.spawn      = BASE.spawn;
+    target.speed      = BASE.speed;
+    target.alphaBoost = BASE.alphaBoost;
     anchor.classList.remove("book-boosted");
   }
 
   function goBoost() {
-    target = { ...BOOST };
+    target.spawn      = BOOST.spawn;
+    target.speed      = BOOST.speed;
+    target.alphaBoost = BOOST.alphaBoost;
     anchor.classList.add("book-boosted");
   }
 
@@ -173,16 +186,18 @@
   anchor.addEventListener("focusout", goBase);
 
   // Click placeholder for future open-book
-  anchor.addEventListener("click", () => {
+  anchor.addEventListener("click", function () {
     anchor.classList.add("clicked");
-    setTimeout(() => anchor.classList.remove("clicked"), 240);
+    setTimeout(function () {
+      anchor.classList.remove("clicked");
+    }, 240);
   });
 
   // Init
   resize();
   step();
 
-  window.addEventListener("resize", () => {
+  window.addEventListener("resize", function () {
     resize();
   }, { passive: true });
 })();
