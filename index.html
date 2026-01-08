@@ -1,35 +1,47 @@
-/* LOCK THE VIEWPORT — no scroll, black frame */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: #000; /* the pillarbox bars */
-}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stag Lore</title>
 
-/* Center the scene */
-.scene {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  <!-- Preload background + hot book for smoother first paint -->
+  <link rel="preload" href="./assets/stag-study.png" as="image">
+  <link rel="preload" href="./assets/hot-book.png" as="image">
 
-/* Scene box matches image height */
-.scene-inner {
-  position: relative;
-  height: 100vh;    /* key: image is as tall as the viewport */
-}
+  <link rel="stylesheet" href="./styles.css">
+</head>
 
-/* BACKGROUND IMAGE — this is the “photo” look in your pic */
-.scene-bg {
-  display: block;
-  height: 100vh;    /* lock to viewport height */
-  width: auto;      /* let width expand/shrink */
-  max-width: 100vw; /* never overflow horizontally */
-  user-select: none;
-  pointer-events: none;
-}
+<body>
+  <main class="scene">
+    <div class="scene-inner">
+      <!-- Full background study image (fills height, black bars left/right) -->
+      <img
+        class="scene-bg"
+        src="./assets/stag-study.png"
+        alt="Stag grimoire on a wooden desk with candles and artifacts"
+        draggable="false"
+      />
+
+      <!-- Hot book overlay (click/hover target) -->
+      <button id="bookAnchor" class="book-anchor" type="button">
+        <span class="shadow-ambient"></span>
+        <span class="shadow-contact"></span>
+
+        <!-- Foreground hot-book image that covers the painted book -->
+        <img
+          class="book-img"
+          src="./assets/hot-book.png"
+          alt="Enchanted stag grimoire"
+          draggable="false"
+        />
+
+        <!-- Embers canvas (fully transparent, JS draws sparks) -->
+        <canvas id="embers" class="embers"></canvas>
+      </button>
+    </div>
+  </main>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
