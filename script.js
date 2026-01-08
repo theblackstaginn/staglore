@@ -1,7 +1,8 @@
 /* =========================================================
-   Stag Lore — Embers (Phase 1)
+   Stag Lore — Embers (Phase 1) (FIXED)
    - Only runs while hovered/focused
-   - Canvas sized to the book anchor
+   - Canvas is only VISIBLE when JS adds .embers-on
+   - No full-canvas dark fade (prevents rectangle “sheet” effect)
    ========================================================= */
 
 (() => {
@@ -43,18 +44,18 @@
       a: rand(0.35, 0.78),
       life: rand(28, 64),
       t: 0,
-      tw: rand(0.004, 0.012) // twinkle
+      tw: rand(0.004, 0.012)
     });
 
     if (sparks.length > MAX) sparks.shift();
   }
 
   function step() {
+    if (!running) return;
     raf = requestAnimationFrame(step);
 
-    // Clear with slight fade for trails
-    ctx.fillStyle = "rgba(0,0,0,0.12)";
-    ctx.fillRect(0, 0, w, h);
+    // Fully clear each frame (no rectangle tint)
+    ctx.clearRect(0, 0, w, h);
 
     // Spawn a few per frame
     for (let i = 0; i < 2; i++) spawn();
@@ -77,14 +78,14 @@
       // Ember
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 165, 80, ${alpha * tw})`;
+      ctx.fillStyle = `rgba(255,165,80,${alpha * tw})`;
       ctx.fill();
 
       // Hot core sometimes
       if (Math.random() < 0.22) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.4, s.r * 0.42), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 220, 170, ${alpha * 0.65})`;
+        ctx.fillStyle = `rgba(255,220,170,${alpha * 0.65})`;
         ctx.fill();
       }
 
@@ -98,17 +99,26 @@
   function start() {
     if (running) return;
     running = true;
+
+    anchor.classList.add("embers-on");
+
     resize();
     ctx.clearRect(0, 0, w, h);
     sparks.length = 0;
+
     cancelAnimationFrame(raf);
+    raf = 0;
     step();
   }
 
   function stop() {
     running = false;
+
+    anchor.classList.remove("embers-on");
+
     cancelAnimationFrame(raf);
     raf = 0;
+
     // Clear after a beat so it doesn’t “pop”
     setTimeout(() => {
       if (!running) ctx.clearRect(0, 0, w, h);
