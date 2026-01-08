@@ -1,55 +1,198 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Stag Lore</title>
-  <meta name="description" content="The Black Stag Inn — Grimoire." />
+/* =========================================================
+   Stag Lore — Desk + Book (CSS placement + embers)
+   ========================================================= */
 
-  <link rel="preload" as="image" href="./assets/stag-study.png">
-  <link rel="preload" as="image" href="./assets/hot-book.png">
+:root{
+  --text: rgba(231,226,219,.92);
 
-  <link rel="stylesheet" href="./styles.css" />
-</head>
+  /* Book placement (tweak these 3) */
+  --bookLeft: 51%;                  /* move left/right */
+  --bookTop: 60%;                   /* move up/down */
+  --bookWidth: min(28vw, 430px);    /* size */
 
-<body>
-  <!-- Background + atmos -->
-  <div class="bg" aria-hidden="true"></div>
-  <div class="atmos" aria-hidden="true"></div>
+  /* 3D tilt */
+  --tiltX: 12deg;
+  --tiltZ: -7deg;
 
-  <main class="stage" role="main" aria-label="Stag Lore desk">
-    <section class="desk-scene" aria-label="Desk scene">
+  /* Glow */
+  --glowA: rgba(255, 168, 64, .22);
+  --glowB: rgba(255, 120, 40, .12);
 
-      <!-- Hot / interactive book overlay -->
-      <button
-        id="bookAnchor"
-        class="book-anchor"
-        type="button"
-        aria-label="Ancient grimoire with stag sigil"
-      >
-        <span class="shadow-ambient" aria-hidden="true"></span>
-        <span class="shadow-contact" aria-hidden="true"></span>
+  /* Vignette */
+  --v1: .08;
+  --v2: .58;
+}
 
-        <img
-          id="bookImg"
-          class="book"
-          src="./assets/hot-book.png"
-          alt="Antique grimoire with stag sigil"
-          draggable="false"
-        />
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
 
-        <canvas
-          id="embers"
-          class="embers"
-          aria-hidden="true">
-        </canvas>
+body{
+  margin:0;
+  background:#050608;
+  color:var(--text);
+  overflow:hidden;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
 
-        <span class="book-hint" aria-hidden="true">CLICK</span>
-      </button>
+/* Background uses stag-study */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-5;
+  background: url("./assets/stag-study.png") center / cover no-repeat;
+  user-select:none;
+  pointer-events:none;
+}
 
-    </section>
-  </main>
+/* Atmosphere overlay */
+.atmos{
+  position:fixed;
+  inset:0;
+  z-index:-4;
+  pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 50% 10%, rgba(255,255,255,var(--v1)), transparent 60%),
+    radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,var(--v2)) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
+}
 
-  <script src="./script.js" defer></script>
-</body>
-</html>
+.stage,
+.desk-scene{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+/* BOOK ANCHOR
+   - Centered on its own box via translate
+   - Position controlled by root vars
+*/
+.book-anchor{
+  position:absolute;
+  left:var(--bookLeft);
+  top:var(--bookTop);
+  width:var(--bookWidth);
+  aspect-ratio: 4 / 6; /* rough book shape */
+
+  transform:translate(-50%, -50%);
+
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  z-index:10;
+
+  outline: 2px solid rgba(0,255,0,.6); /* DEBUG: remove later */
+
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Book fills anchor */
+.book{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  pointer-events:none;
+
+  transform:
+    perspective(900px)
+    rotateX(var(--tiltX))
+    rotateZ(var(--tiltZ));
+  transform-origin:50% 60%;
+
+  filter: drop-shadow(0 18px 26px rgba(0,0,0,.50));
+}
+
+/* Shadows */
+.shadow-ambient{
+  position:absolute;
+  left:50%;
+  top:58%;
+  width:82%;
+  height:28%;
+  transform:translate(-50%, -50%) rotateZ(var(--tiltZ));
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.32), rgba(0,0,0,0) 70%);
+  filter:blur(10px);
+  opacity:.65;
+  pointer-events:none;
+}
+
+.shadow-contact{
+  position:absolute;
+  left:50%;
+  top:62%;
+  width:74%;
+  height:18%;
+  transform:translate(-50%, -50%) rotateZ(var(--tiltZ));
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 55%, rgba(0,0,0,.45), rgba(0,0,0,0) 65%);
+  filter:blur(6px);
+  opacity:.92;
+  pointer-events:none;
+}
+
+/* Embers */
+.embers{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:12;
+  pointer-events:none;
+  opacity:0;
+  transition: opacity .22s ease;
+}
+
+/* Hint */
+.book-hint{
+  position:absolute;
+  left:50%;
+  top:94%;
+  transform:translate(-50%, -50%);
+  font-size: 12px;
+  letter-spacing:.28em;
+  opacity:.42;
+  text-transform:uppercase;
+  z-index:12;
+  pointer-events:none;
+}
+
+/* Hover / focus wake */
+.book-anchor:hover .embers,
+.book-anchor:focus-visible .embers{
+  opacity:1;
+}
+
+.book-anchor:hover .book,
+.book-anchor:focus-visible .book{
+  filter:
+    drop-shadow(0 18px 26px rgba(0,0,0,.52))
+    drop-shadow(0 0 22px var(--glowA))
+    drop-shadow(0 0 46px var(--glowB));
+}
+
+.book-anchor:focus-visible{
+  outline:2px solid rgba(255,190,120,.8);
+  outline-offset:8px;
+  border-radius:18px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .embers{ transition:none; }
+  .book-anchor:hover .book{
+    filter: drop-shadow(0 18px 26px rgba(0,0,0,.52));
+  }
+}
+
+/* Simple mobile adjustment */
+@media (max-width: 768px){
+  :root{
+    --bookLeft: 50%;
+    --bookTop: 63%;
+    --bookWidth: 62vw;
+  }
+}
