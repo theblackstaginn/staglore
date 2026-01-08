@@ -1,21 +1,35 @@
 /* =========================================================
-   Stag Lore — Desk Grimoire (CLOSED BOOK ONLY)
-   - Desk background fixed
-   - Book sits on desk (contact + ambient shadow)
-   - Hover glow + embers
-   - Intentional hover beat (hint appears after a pause)
-   - Click = pickup micro-lift (no reader mode yet)
+   Stag Lore — Desk + Book (Phase 1)
+   - ONLY: book sitting on desk with ember glow on hover
+   - No open-book mode yet
+   - Paths are lowercase (GitHub Pages is case-sensitive)
    ========================================================= */
 
 :root{
-  --deskDim: .30;
+  --text: rgba(231,226,219,.92);
 
-  --glow: rgba(255,150,70,.22);
-  --glow2: rgba(255,105,35,.14);
+  /* Scene tuning */
+  --sceneMax: 1200px;
 
-  --text: rgba(245,240,230,.92);
+  /* Book placement (tweak these 3 if needed) */
+  --bookLeft: 23%;
+  --bookTop: 63%;
+  --bookWidth: min(460px, 48vw);
 
-  --ease: cubic-bezier(.2,.9,.2,1);
+  /* “Sitting” illusion */
+  --tiltX: 12deg;     /* tips toward desk */
+  --tiltZ: -7deg;     /* slight rotation */
+  --lift: 0px;        /* keep 0 to avoid hovering */
+
+  /* Glow */
+  --glowA: rgba(255, 168, 64, .22);
+  --glowB: rgba(255, 120, 40, .12);
+  --ember: rgba(255, 160, 70, .75);
+  --ember2: rgba(255, 210, 160, .35);
+
+  /* Vignette strength */
+  --v1: .08;
+  --v2: .58;
 }
 
 *{ box-sizing:border-box; }
@@ -23,13 +37,13 @@ html,body{ height:100%; }
 body{
   margin:0;
   background:#050608;
-  overflow:hidden;
   color:var(--text);
+  overflow:hidden;
   font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 
 /* =========================
-   BACKGROUND
+   BACKGROUND (fixed)
    ========================= */
 .bg{
   position:fixed;
@@ -39,19 +53,21 @@ body{
   transform: translateZ(0);
 }
 
+/* Atmos overlay (dust / vignette) */
 .atmos{
   position:fixed;
   inset:0;
   z-index:-4;
   pointer-events:none;
   background:
-    radial-gradient(120% 85% at 55% 12%, rgba(255,210,160,.10), transparent 58%),
-    radial-gradient(140% 140% at 50% 55%, transparent 52%, rgba(0,0,0,.78) 100%),
-    linear-gradient(180deg, rgba(0,0,0,var(--deskDim)), rgba(0,0,0,calc(var(--deskDim) + .18)));
+    radial-gradient(120% 90% at 50% 10%, rgba(255,255,255,var(--v1)), transparent 60%),
+    radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,var(--v2)) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.26));
+  mix-blend-mode: normal;
 }
 
 /* =========================
-   STAGE
+   STAGE LAYOUT
    ========================= */
 .stage{
   position:relative;
@@ -59,222 +75,163 @@ body{
   width:100%;
 }
 
+.desk-scene{
+  position:relative;
+  height:100%;
+  width:min(var(--sceneMax), 100%);
+  margin:0 auto;
+}
+
 /* =========================
-   BOOK PLACEMENT (desk plane)
+   BOOK ANCHOR
    ========================= */
 .book-anchor{
-  appearance:none;
-  border:none;
-  background:transparent;
+  position:absolute;
+  left:var(--bookLeft);
+  top:var(--bookTop);
+  transform: translate(-50%, -50%);
+  width: var(--bookWidth);
+  aspect-ratio: 4 / 3; /* anchor box */
   padding:0;
+  border:0;
+  background:transparent;
   cursor:pointer;
 
-  position:absolute;
+  /* HARD LOCK layering so book can’t disappear */
+  z-index:10;
 
-  /* Off-center placement; tuned for “book on desk” feel */
-  left: 18%;
-  top: 54%;
-
-  width: min(520px, 62vw);
-  aspect-ratio: 4 / 3;
-
-  transform: translateZ(0);
-  outline: none;
+  /* keep it stable */
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Keyboard focus */
-.book-anchor:focus-visible{
-  outline: 2px solid rgba(255,220,170,.55);
-  outline-offset: 12px;
-  border-radius: 18px;
-}
-
-/* =========================
-   SHADOWS (this stops hovering)
-   ========================= */
-
-/* Tight contact shadow: where the book touches the wood */
-.shadow-contact{
-  position:absolute;
-  left: 12%;
-  top: 64%;
-  width: 76%;
-  height: 20%;
-  border-radius: 999px;
-  background: radial-gradient(closest-side, rgba(0,0,0,.62), transparent 70%);
-  filter: blur(10px);
-  opacity:.90;
-
-  /* squash to desk plane */
-  transform: perspective(1200px) rotateX(78deg) rotateZ(-2deg);
-  transform-origin: 50% 50%;
-
-  transition: opacity 520ms var(--ease), filter 520ms var(--ease), transform 520ms var(--ease);
-  pointer-events:none;
-  z-index:0;
-}
-
-/* Ambient shadow: softer spill */
-.shadow-ambient{
-  position:absolute;
-  left: 6%;
-  top: 60%;
-  width: 86%;
-  height: 30%;
-  border-radius: 999px;
-  background: radial-gradient(closest-side, rgba(0,0,0,.42), transparent 78%);
-  filter: blur(18px);
-  opacity:.55;
-  transform: perspective(1200px) rotateX(78deg) rotateZ(-2deg);
-  transition: opacity 520ms var(--ease), filter 520ms var(--ease), transform 520ms var(--ease);
-  pointer-events:none;
-  z-index:0;
-}
-
-/* =========================
-   BOOK IMAGE (locked asset)
-   ========================= */
+/* Book image */
 .book{
   position:absolute;
-  left:0;
-  top:0;
-  width:100%;
+  left:50%;
+  top:50%;
+  width: 100%;
   height:auto;
-  display:block;
-  z-index:2;
-
-  /* Base resting pose: “sitting” */
-  transform-origin: 42% 72%;
   transform:
-    perspective(1200px)
-    rotateX(10deg)
-    rotateY(-18deg)
-    rotateZ(-2deg)
-    translateY(7px);
+    translate(-50%, -50%)
+    perspective(900px)
+    rotateX(var(--tiltX))
+    rotateZ(var(--tiltZ))
+    translateY(var(--lift));
+  transform-origin: 50% 60%;
+  display:block;
 
+  /* Make it sit “in” the scene */
   filter:
-    drop-shadow(0 22px 22px rgba(0,0,0,.36))
-    drop-shadow(0 6px 10px rgba(0,0,0,.24));
+    drop-shadow(0 18px 26px rgba(0,0,0,.50));
 
-  transition: transform 520ms var(--ease), filter 520ms var(--ease);
-  user-select:none;
-  -webkit-user-drag:none;
+  /* no accidental dragging */
+  pointer-events:none;
 }
 
-/* =========================
-   EMBERS
-   ========================= */
+/* Ambient shadow (broad, soft) */
+.shadow-ambient{
+  position:absolute;
+  left:50%;
+  top:58%;
+  width: 82%;
+  height: 28%;
+  transform: translate(-50%, -50%) rotateZ(var(--tiltZ));
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(0,0,0,.32),
+    rgba(0,0,0,0) 70%
+  );
+  filter: blur(10px);
+  opacity: .65;
+  z-index:9;
+  pointer-events:none;
+}
+
+/* Contact shadow (tight) — THIS kills “hovering” */
+.shadow-contact{
+  position:absolute;
+  left:50%;
+  top:62%;
+  width: 74%;
+  height: 18%;
+  transform: translate(-50%, -50%) rotateZ(var(--tiltZ));
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 55%,
+    rgba(0,0,0,.45),
+    rgba(0,0,0,0) 65%
+  );
+  filter: blur(6px);
+  opacity: .92;
+  z-index:9;
+  pointer-events:none;
+}
+
+/* Embers canvas sits above book */
 .embers{
   position:absolute;
-  inset:-12% -12% -12% -12%;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:12;
   pointer-events:none;
-  z-index:1;
+  opacity:0;
+  transition: opacity .22s ease;
 }
 
-/* Ember particle */
-.ember{
+/* Optional hint text */
+.book-hint{
   position:absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  opacity: 0;
-
-  background: radial-gradient(circle,
-    rgba(255,185,85,.95),
-    rgba(255,120,40,.80),
-    transparent 70%);
-
-  animation: emberRise var(--dur, 1600ms) ease-out forwards;
-}
-
-@keyframes emberRise{
-  0%{
-    transform: translate(var(--x, 0px), var(--y, 0px)) scale(.7);
-    opacity: 0;
-  }
-  12%{ opacity: .95; }
-  100%{
-    transform: translate(calc(var(--x, 0px) + var(--dx, 0px)),
-                         calc(var(--y, 0px) - var(--lift, 90px))) scale(0);
-    opacity: 0;
-  }
-}
-
-/* =========================
-   INTENTIONAL BEAT + HINT
-   ========================= */
-.hint{
-  position:absolute;
-  left: 26%;
-  top: 86%;
-  letter-spacing: .24em;
+  left:50%;
+  top:92%;
+  transform: translate(-50%, -50%);
   font-size: 12px;
-  opacity: 0;
-  transform: translateY(2px);
-  text-shadow: 0 2px 10px rgba(0,0,0,.6);
+  letter-spacing: .28em;
+  opacity:.42;
+  text-transform:uppercase;
+  z-index:12;
   pointer-events:none;
-  transition: opacity 220ms var(--ease), transform 220ms var(--ease);
-  z-index:3;
 }
 
-.book-anchor.armed .hint{
-  opacity:.52;
-  transform: translateY(0);
+/* Hover / focus: intentional “ritual wake” */
+.book-anchor:hover .embers,
+.book-anchor:focus-visible .embers{
+  opacity:1;
 }
 
-/* =========================
-   HOVER MAGIC (ritual)
-   ========================= */
 .book-anchor:hover .book,
 .book-anchor:focus-visible .book{
-  transform:
-    perspective(1200px)
-    rotateX(12deg)
-    rotateY(-34deg) /* “rotate more” */
-    rotateZ(-2deg)
-    translateY(7px);
-
   filter:
-    drop-shadow(0 26px 26px rgba(0,0,0,.38))
-    drop-shadow(0 10px 18px rgba(0,0,0,.26))
-    drop-shadow(0 0 22px var(--glow))
-    drop-shadow(0 0 48px var(--glow2));
+    drop-shadow(0 18px 26px rgba(0,0,0,.52))
+    drop-shadow(0 0 22px var(--glowA))
+    drop-shadow(0 0 46px var(--glowB));
 }
 
 .book-anchor:hover .shadow-contact,
 .book-anchor:focus-visible .shadow-contact{
-  opacity:.70;
-  filter: blur(14px);
+  opacity: .98; /* slightly stronger so it still feels grounded */
 }
 
-.book-anchor:hover .shadow-ambient,
-.book-anchor:focus-visible .shadow-ambient{
-  opacity:.48;
-  filter: blur(22px);
-}
-
-/* Click pickup beat (micro lift that feels deliberate) */
-.book-anchor.picking .book{
-  transform:
-    perspective(1200px)
-    rotateX(14deg)
-    rotateY(-38deg)
-    rotateZ(-2deg)
-    translateY(-8px)   /* lift */
-    translateZ(26px);  /* toward viewer */
-}
-
-.book-anchor.picking .shadow-contact{
-  opacity:.45;
-  filter: blur(18px);
-}
-.book-anchor.picking .shadow-ambient{
-  opacity:.35;
-  filter: blur(26px);
+.book-anchor:focus-visible{
+  outline: 2px solid rgba(255, 190, 120, .22);
+  outline-offset: 8px;
+  border-radius: 18px;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .book, .shadow-contact, .shadow-ambient, .hint{ transition:none !important; }
-  .ember{ animation:none !important; }
+  .embers{ transition:none; }
+  .book-anchor:hover .book{ filter: drop-shadow(0 18px 26px rgba(0,0,0,.52)); }
+}
+
+/* Small screens: nudge placement */
+@media (max-width: 760px){
+  :root{
+    --bookLeft: 36%;
+    --bookTop: 66%;
+    --bookWidth: min(420px, 78vw);
+    --tiltX: 10deg;
+    --tiltZ: -6deg;
+  }
+  body{ overflow:hidden; }
 }
