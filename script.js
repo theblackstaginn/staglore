@@ -32,29 +32,19 @@
   let x, y, vx, vy;
 
   if (r < 0.6) {
-    // ======================================
-    // RIGHT EDGE band — tighter & a bit higher
-    // ======================================
-    // Hug the page edge and just off the right side
-    x  = rand(w * 0.90, w * 1.06);
-    // Focus mostly from mid-book down to just above the base
-    y  = rand(h * 0.35, h * 0.85);
+    // RIGHT EDGE — higher + tighter edge hug
+    x  = rand(w * 0.94, w * 1.06);   // shifted right a tiny bit
+    y  = rand(h * 0.28, h * 0.78);   // lifted upward slightly
 
-    // Gentle outward + upward drift
     vx = rand(0.03, 0.10);
-    vy = rand(-0.65, -0.28);
+    vy = rand(-0.65, -0.30);
   } else {
-    // ======================================
-    // TOP EDGE band — right on the lip + early plume
-    // ======================================
-    // Across the main width of the cover
-    x  = rand(w * 0.25, w * 0.78);
-    // Very close to the top edge, slightly below to slightly above
-    y  = rand(h * 0.04, h * 0.16);
+    // TOP EDGE — right on the lip (no drift onto face)
+    x  = rand(w * 0.27, w * 0.73);
+    y  = rand(h * 0.00, h * 0.08);   // moved UP (closer to the very top)
 
-    // Mostly upward, small sideways wobble
     vx = rand(-0.10, 0.10);
-    vy = rand(-0.70, -0.35);
+    vy = rand(-0.72, -0.38);
   }
 
   sparks.push({
