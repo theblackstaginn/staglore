@@ -178,12 +178,15 @@ body{
   opacity:1;
 }
 
-.book-anchor:hover .book-img,
-.book-anchor:focus-visible .book-img{
+.book-anchor:hover .book,
+.book-anchor:focus-visible .book{
   filter:
+    /* ground shadow, unchanged */
     drop-shadow(0 18px 26px rgba(0,0,0,.52))
-    drop-shadow(0 0 22px var(--glowA))
-    drop-shadow(0 0 46px var(--glowB));
+    /* strong warm glow from right edge */
+    drop-shadow(14px -4px 26px var(--glowA))
+    /* softer halo from top edge */
+    drop-shadow(0 -10px 34px var(--glowB));
 }
 
 .book-anchor:focus-visible{
