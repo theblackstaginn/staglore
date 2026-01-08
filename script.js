@@ -27,25 +27,37 @@
   }
 
   function spawnOne() {
-  const r = Math.random();
+  // choose segment: 0 = top bar, 1 = right leg
+  const seg = Math.random() < 0.6 ? 0 : 1;
+  const t = Math.random();
 
-  let x, y, vx, vy;
+  let nx, ny;
 
-  if (r < 0.6) {
-    // RIGHT EDGE — higher + tighter edge hug
-    x  = rand(w * 0.94, w * 1.06);   // shifted right a tiny bit
-    y  = rand(h * 0.28, h * 0.78);   // lifted upward slightly
-
-    vx = rand(0.03, 0.10);
-    vy = rand(-0.65, -0.30);
+  if (seg === 0) {
+    // top bar of 7 (left→right)
+    nx = 0.15 + (0.80 * t); // 15% → 95%
+    ny = 0.18;              // ~18% down from top
   } else {
-    // TOP EDGE — right on the lip (no drift onto face)
-    x  = rand(w * 0.27, w * 0.73);
-    y  = rand(h * 0.00, h * 0.08);   // moved UP (closer to the very top)
-
-    vx = rand(-0.10, 0.10);
-    vy = rand(-0.72, -0.38);
+    // right leg of 7 (downward)
+    nx = 0.78;              // fixed near right edge
+    ny = 0.18 + (0.75 * t); // 18% → 93%
   }
+
+  // jitter so it doesn’t look plotted
+  nx += (Math.random() - 0.5) * 0.05; // ±5% width
+  ny += (Math.random() - 0.5) * 0.05; // ±5% height
+
+  // clamp to avoid bleeding off the book on weird aspect ratios
+  nx = Math.min(0.98, Math.max(0.02, nx));
+  ny = Math.min(0.98, Math.max(0.02, ny));
+
+  // convert book-local → canvas px
+  const x = nx * w;
+  const y = ny * h;
+
+  // upward drift (embers rise)
+  const vx = (Math.random() - 0.5) * 0.20;    // slight lateral wander
+  const vy = -rand(0.55, 0.85);               // rise speed
 
   sparks.push({
     x, y,
