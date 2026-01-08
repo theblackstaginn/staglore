@@ -6,9 +6,9 @@
   --text: rgba(231,226,219,.92);
 
   /* Book placement (tweak these 3) */
-  --bookLeft: 51%;                  /* move left/right */
-  --bookTop: 60%;                   /* move up/down */
-  --bookWidth: min(28vw, 430px);    /* size */
+  --bookLeft: 54%;                  /* move left/right */
+  --bookTop: 58%;                   /* move up/down */
+  --bookWidth: min(26vw, 400px);    /* size */
 
   /* 3D tilt */
   --tiltX: 12deg;
