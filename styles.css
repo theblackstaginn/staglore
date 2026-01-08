@@ -146,16 +146,17 @@ body{
 }
 
 /* Ember canvas */
-.embers{
+.book-anchor .embers{
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:12;
   pointer-events:none;
-  opacity:0;
-  transition: opacity .22s ease;
-  background: transparent;   /* <-- make sure this is here, no color */
+
+  /* Canvas clamps to upper-right quadrant of the book */
+  left:55%;          /* moves canvas to right page edge */
+  top:0%;            /* sits at the top edge */
+  width:45%;         /* only right page slice */
+  height:40%;        /* only upper portion */
+
+  transform:translate(0,0); /* no centering */
 }
 
 /* Hint text */
