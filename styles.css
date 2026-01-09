@@ -1,78 +1,233 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>Stag Lore</title>
+/* ==========================================================
+   Stag Lore — Fullscreen scene + hot book overlay + embers
+   + Stone threshold panels (desktop: left/right, mobile: top/bottom)
+   ========================================================== */
 
-  <!-- Preload key images -->
-  <link rel="preload" href="./assets/stag-study.png" as="image">
-  <link rel="preload" href="./assets/hot-book.png" as="image">
+/* Root variables */
+:root {
+  --text: rgba(231,226,219,.92);
+  --bg-dark: #050608;
 
-  <link rel="stylesheet" href="./styles.css">
-</head>
+  /* Mobile-safe viewport unit (set in JS) */
+  --vh: 1vh;
 
-<body>
-  <main class="scene">
-    <!-- DESKTOP THRESHOLD PANELS (left/right walls) -->
-    <img
-      class="hall hall-desktop hall-left"
-      src="./assets/web-panel-left.jpg"
-      alt="Stone hallway wall on the left"
-      draggable="false"
-    />
-    <img
-      class="hall hall-desktop hall-right"
-      src="./assets/web-panel-right.jpg"
-      alt="Stone hallway wall on the right"
-      draggable="false"
-    />
+  /* Book placement within the scene box
+     (percentage of .scene-inner width/height) */
+  --bookX: 55.5%;   /* horizontal center of hot book */
+  --bookY: 45.5%;   /* vertical center of hot book */
+  --bookWidth: 29%; /* width relative to scene-inner width */
 
-    <!-- MOBILE THRESHOLD PANELS (top lintel + floor) -->
-    <img
-      class="hall hall-mobile hall-top"
-      src="./assets/mobile-ceiling.jpg"
-      alt="Stone doorway header above"
-      draggable="false"
-    />
-    <img
-      class="hall hall-mobile hall-bottom"
-      src="./assets/mobile-floor.jpg"
-      alt="Stone floor threshold below"
-      draggable="false"
-    />
+  /* Glow colors (if you want them later) */
+  --glowA: rgba(255,168,64,.22);
+  --glowB: rgba(255,120,40,.12);
+}
 
-    <div class="scene-inner">
-      <!-- Background study image (fills height, letterboxed horizontally) -->
-      <img
-        class="scene-bg"
-        src="./assets/stag-study.png"
-        alt="Stag grimoire in a study full of artifacts"
-        draggable="false"
-      />
+/* ---------- Global layout ---------- */
 
-      <!-- Hot book overlay (click/hover target) -->
-      <button id="bookAnchor" class="book-anchor" type="button">
-        <span class="shadow-ambient"></span>
-        <span class="shadow-contact"></span>
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: calc(var(--vh) * 100); /* true viewport height */
+  overflow: hidden;              /* no scroll */
+  background: #000;              /* outer bars behind everything */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+}
 
-        <!-- Foreground hot-book image -->
-        <img
-          class="book-img"
-          src="./assets/hot-book.png"
-          alt="Enchanted stag grimoire"
-          draggable="false"
-        />
+/* Make sure body takes the same height as html */
+body {
+  display: flex;
+}
 
-        <!-- Embers canvas (fully transparent, JS draws sparks) -->
-        <canvas id="embers" class="embers"></canvas>
-      </button>
-    </div>
-  </main>
+/* ---------- Scene + threshold frame ---------- */
 
-  <script src="./script.js" defer></script>
-</body>
-</html>
+.scene {
+  position: relative;                    /* anchor for hallway panels */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(var(--vh) * 100);
+  overflow: hidden;                      /* hide panel overflow */
+}
+
+/* Central scene box (study + book) */
+/* KEY CHANGE: let the image set the height; we only constrain max size */
+.scene-inner {
+  position: relative;
+  z-index: 2;                    /* above hallway panels */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 100vw;
+  max-height: calc(var(--vh) * 100);
+}
+
+/* Background image:
+   - Scales NATURALLY
+   - Fits inside viewport
+   - No forced 100vh
+*/
+.scene-bg {
+  display: block;
+  max-width: 100vw;
+  max-height: calc(var(--vh) * 100);
+  width: auto;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ---------- Hallway threshold panels ---------- */
+
+.hall {
+  position: absolute;
+  display: none;          /* toggled by media queries */
+  pointer-events: none;
+  user-select: none;
+  object-fit: cover;
+  z-index: 1;             /* behind central scene */
+}
+
+/* Desktop: left/right corridor walls */
+@media (min-width: 768px) {
+  .hall-desktop {
+    display: block;
+  }
+  .hall-mobile {
+    display: none;
+  }
+
+  .hall-left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(24vw, 280px);  /* tweak to taste */
+  }
+
+  .hall-right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(24vw, 280px);
+  }
+}
+
+/* Mobile portrait: top lintel + floor band */
+@media (max-width: 767px) {
+  .hall-desktop {
+    display: none;
+  }
+  .hall-mobile {
+    display: block;
+  }
+
+  .hall-top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: min(26vh, 220px); /* doorway header; adjust if needed */
+  }
+
+  .hall-bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: min(26vh, 220px); /* floor threshold */
+  }
+}
+
+/* ---------- Hot book button ---------- */
+
+.book-anchor {
+  position: absolute;
+
+  /* Driven by variables so you can tweak easily */
+  left:  var(--bookX);
+  top:   var(--bookY);
+  width: var(--bookWidth);
+
+  transform: translate(-50%, -50%);
+
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  outline: none;
+  z-index: 10;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Optional shadow layers under the hot book */
+
+.shadow-ambient,
+.shadow-contact {
+  position: absolute;
+  inset: 6% 4% 3% 4%;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+/* Soft ambient shadow */
+.shadow-ambient {
+  background: radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.75), transparent 70%);
+  filter: blur(22px);
+  opacity: 0.45;
+}
+
+/* Tighter contact shadow */
+.shadow-contact {
+  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.95), transparent 75%);
+  filter: blur(10px);
+  opacity: 0.7;
+}
+
+/* Hot book image itself */
+
+.book-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Slight lift on hover/focus */
+
+.book-anchor:hover .book-img,
+.book-anchor:focus-visible .book-img {
+  transform: translateY(-2px);
+  transition: transform 160ms ease-out;
+}
+
+/* ---------- Embers canvas ---------- */
+
+.embers {
+  position: absolute;
+  top: -20%;
+  left: -15%;
+  width: 130%;
+  height: 140%;
+  pointer-events: none;
+  z-index: 2;
+  background: transparent;
+}
+
+/* ---------- Optional: small tweak on very narrow phones ---------- */
+/* If the book feels too big on tiny screens, uncomment this.
+@media (max-width: 480px) {
+  :root {
+    --bookWidth: 32%;
+  }
+}
+*/
