@@ -36,28 +36,32 @@ body {
   color: var(--text);
 }
 
-/* Make sure body takes the same height as html */
 body {
   display: flex;
 }
 
 /* ---------- Scene + threshold frame ---------- */
 
+/* FLEX CONTAINER:
+   - Desktop: row  [ left wall | study | right wall ]
+   - Mobile:  col  [ top wall  | study | bottom wall ]
+*/
 .scene {
-  position: relative;                    /* anchor for hallway panels */
+  position: relative;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: calc(var(--vh) * 100);
-  overflow: hidden;                      /* hide panel overflow */
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 /* Central scene box (study + book) */
 .scene-inner {
   position: relative;
-  z-index: 2;                    /* above hallway panels */
+  z-index: 2;                    /* above panels */
+  flex: 0 0 auto;                /* natural width/height */
 
   display: flex;
   align-items: center;
@@ -65,13 +69,12 @@ body {
 
   max-width: 100vw;
   max-height: calc(var(--vh) * 100);
+
+  /* default order; overridden per breakpoint below */
+  order: 2;
 }
 
-/* Background image:
-   - Scales NATURALLY
-   - Fits inside viewport
-   - No forced 100vh
-*/
+/* Background study image: natural scaling inside viewport */
 .scene-bg {
   display: block;
   max-width: 100vw;
@@ -85,16 +88,19 @@ body {
 /* ---------- Hallway threshold panels ---------- */
 
 .hall {
-  position: absolute;
-  display: none;          /* toggled by media queries */
-  pointer-events: none;
+  flex: 1 1 auto;       /* fill leftover space between study and edge */
+  display: none;        /* toggled by media queries */
   user-select: none;
+  pointer-events: none;
   object-fit: cover;
-  z-index: 1;             /* behind central scene */
 }
 
 /* Desktop: left/right corridor walls */
 @media (min-width: 768px) {
+  .scene {
+    flex-direction: row;
+  }
+
   .hall-desktop {
     display: block;
   }
@@ -102,23 +108,34 @@ body {
     display: none;
   }
 
+  /* ORDER: left | study | right */
   .hall-left {
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 50vw;          /* fill entire left half; overlaps under center */
+    order: 1;
+    align-self: stretch;
+
+    /* seam side = RIGHT edge of this image */
+    object-position: right center;
+  }
+
+  .scene-inner {
+    order: 2;
   }
 
   .hall-right {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 50vw;          /* fill entire right half */
+    order: 3;
+    align-self: stretch;
+
+    /* seam side = LEFT edge of this image */
+    object-position: left center;
   }
 }
 
 /* Mobile portrait: top lintel + floor band */
 @media (max-width: 767px) {
+  .scene {
+    flex-direction: column;
+  }
+
   .hall-desktop {
     display: none;
   }
@@ -126,18 +143,25 @@ body {
     display: block;
   }
 
+  /* ORDER: top | study | bottom */
   .hall-top {
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50vh;         /* fill upper half; extends behind center image */
+    order: 1;
+    width: 100%;
+
+    /* seam side = BOTTOM of this image */
+    object-position: center bottom;
+  }
+
+  .scene-inner {
+    order: 2;
   }
 
   .hall-bottom {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50vh;         /* fill lower half */
+    order: 3;
+    width: 100%;
+
+    /* seam side = TOP of this image */
+    object-position: center top;
   }
 }
 
@@ -146,7 +170,6 @@ body {
 .book-anchor {
   position: absolute;
 
-  /* Driven by variables so you can tweak easily */
   left:  var(--bookX);
   top:   var(--bookY);
   width: var(--bookWidth);
@@ -165,7 +188,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Optional shadow layers under the hot book */
+/* Shadows under hot book */
 
 .shadow-ambient,
 .shadow-contact {
@@ -175,21 +198,19 @@ body {
   border-radius: 999px;
 }
 
-/* Soft ambient shadow */
 .shadow-ambient {
   background: radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.75), transparent 70%);
   filter: blur(22px);
   opacity: 0.45;
 }
 
-/* Tighter contact shadow */
 .shadow-contact {
   background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.95), transparent 75%);
   filter: blur(10px);
   opacity: 0.7;
 }
 
-/* Hot book image itself */
+/* Hot book image */
 
 .book-img {
   position: relative;
@@ -200,8 +221,6 @@ body {
   pointer-events: none;
   z-index: 1;
 }
-
-/* Slight lift on hover/focus */
 
 .book-anchor:hover .book-img,
 .book-anchor:focus-visible .book-img {
@@ -222,8 +241,7 @@ body {
   background: transparent;
 }
 
-/* ---------- Optional: small tweak on very narrow phones ---------- */
-/* If the book feels too big on tiny screens, uncomment this.
+/* Optional tweak for very small phones
 @media (max-width: 480px) {
   :root {
     --bookWidth: 32%;
