@@ -55,7 +55,6 @@ body {
 }
 
 /* Central scene box (study + book) */
-/* KEY CHANGE: let the image set the height; we only constrain max size */
 .scene-inner {
   position: relative;
   z-index: 2;                    /* above hallway panels */
@@ -107,14 +106,14 @@ body {
     top: 0;
     left: 0;
     bottom: 0;
-    width: min(24vw, 280px);  /* tweak to taste */
+    width: 50vw;          /* fill entire left half; overlaps under center */
   }
 
   .hall-right {
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(24vw, 280px);
+    width: 50vw;          /* fill entire right half */
   }
 }
 
@@ -131,14 +130,14 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: min(26vh, 220px); /* doorway header; adjust if needed */
+    height: 50vh;         /* fill upper half; extends behind center image */
   }
 
   .hall-bottom {
     bottom: 0;
     left: 0;
     right: 0;
-    height: min(26vh, 220px); /* floor threshold */
+    height: 50vh;         /* fill lower half */
   }
 }
 
