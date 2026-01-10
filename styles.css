@@ -1,38 +1,92 @@
 :root {
-  --scene-max-width: 1200px;
+  /* max width for desktop; tweak if you like */
+  --scene-max-width: 1400px;
+
+  /* default hotspot sizes (% of scene width) */
+  --hotspot-size-desktop: 14%;
+  --hotspot-size-mobile: 18%;
 }
+
+/* Reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: #050608;
+  color: #f4f1ea;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* ===== Scene container ===== */
 
 .scene-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
 }
 
 .scene {
   position: relative;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
   max-width: var(--scene-max-width);
-  aspect-ratio: 16/9;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
 .scene-bg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
+
+/* ===== Hotspot buttons ===== */
 
 .hotspot {
   position: absolute;
   transform: translate(-50%, -50%);
   border: none;
-  background: none;
   padding: 0;
+  background: none;
   cursor: pointer;
+
+  /* these are set from JS per-button */
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: var(--size, var(--hotspot-size-desktop));
+  aspect-ratio: 1 / 1;
 }
 
 .hotspot img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none; /* clicks go to the button, not the img */
+}
+
+/* Hover on desktop */
+@media (hover: hover) and (pointer: fine) {
+  .hotspot:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* Slightly bigger targets on mobile */
+@media (max-width: 768px) {
+  .hotspot {
+    width: var(--size, var(--hotspot-size-mobile));
+  }
 }
