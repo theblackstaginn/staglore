@@ -11,6 +11,7 @@
   <!-- Preload key images -->
   <link rel="preload" href="./assets/stag-study.png" as="image">
   <link rel="preload" href="./assets/hot-book.png" as="image">
+  <link rel="preload" href="./assets/stag-study-mobile.png" as="image">
 
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -18,20 +19,18 @@
 <body>
   <main class="scene">
     <div class="scene-inner">
-      <!-- Background study image (fills height, letterboxed horizontally) -->
       <img
         class="scene-bg"
         src="./assets/stag-study.png"
+        data-mobile-src="./assets/stag-study-mobile.png"
         alt="Stag grimoire in a study full of artifacts"
         draggable="false"
       />
 
-      <!-- Hot book overlay (click/hover target) -->
       <button id="bookAnchor" class="book-anchor" type="button">
         <span class="shadow-ambient"></span>
         <span class="shadow-contact"></span>
 
-        <!-- Foreground hot-book image -->
         <img
           class="book-img"
           src="./assets/hot-book.png"
@@ -39,7 +38,6 @@
           draggable="false"
         />
 
-        <!-- Embers canvas (fully transparent, JS draws sparks) -->
         <canvas id="embers" class="embers"></canvas>
       </button>
     </div>
