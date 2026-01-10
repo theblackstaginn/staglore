@@ -90,3 +90,8 @@ body {
     width: var(--size, var(--hotspot-size-mobile));
   }
 }
+/* === DEBUG HOTSPOT VISIBILITY === */
+.hotspot {
+  outline: 3px solid rgba(255, 0, 0, 0.85);
+  background: rgba(255, 0, 0, 0.15);
+}
