@@ -1,166 +1,38 @@
 :root {
   --scene-max-width: 1200px;
-  --hotspot-size-desktop: 14%; /* default width of button images */
-  --hotspot-size-mobile: 18%;
-  --book-modal-bg: rgba(0,0,0,.82);
-  --page-bg: #f2e6cf;
-  --page-radius: 10px;
 }
-
-/* Basic reset */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #050608;
-  color: #f4f1ea;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* ===== Scene ===== */
 
 .scene-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  background: #000;
 }
 
 .scene {
   position: relative;
   width: 100%;
   max-width: var(--scene-max-width);
-  /* maintain aspect ratio based on background (approx 16:9) */
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
+  aspect-ratio: 16/9;
 }
 
 .scene-bg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
-
-/* ===== Hotspots ===== */
 
 .hotspot {
   position: absolute;
-  border: none;
-  padding: 0;
-  background: none;
-  cursor: pointer;
   transform: translate(-50%, -50%);
-  /* coords come from CSS vars set in JS */
-  left: var(--x, 50%);
-  top: var(--y, 50%);
-  width: var(--size, var(--hotspot-size-desktop));
-  aspect-ratio: 1 / 1;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .hotspot img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-/* subtle hover on desktop */
-@media (hover: hover) and (pointer: fine) {
-  .hotspot:hover {
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-}
-
-/* mobile tweaks */
-@media (max-width: 768px) {
-  .hotspot {
-    width: var(--size, var(--hotspot-size-mobile));
-  }
-}
-
-/* ===== Book Modal ===== */
-
-.book-modal {
-  position: fixed;
-  inset: 0;
-  display: none;       /* toggled via JS */
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-}
-
-.book-modal.is-open {
-  display: flex;
-}
-
-.book-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: var(--book-modal-bg);
-  backdrop-filter: blur(4px);
-}
-
-.book-modal-inner {
-  position: relative;
-  max-width: 960px;
-  width: 94%;
-  max-height: 90vh;
-  z-index: 21;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.book-modal-close {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  border: none;
-  background: transparent;
-  color: #f4f1ea;
-  font-size: 2rem;
-  cursor: pointer;
-  z-index: 22;
-}
-
-/* Book UI as 2-page spread on wide screens */
-.book-ui {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-}
-
-.page {
-  background: var(--page-bg);
-  border-radius: var(--page-radius);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .7);
-  padding: 16px 18px;
-  overflow: hidden;
-}
-
-.page-inner {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-/* Mobile: stack pages vertically (like scrolling grimoire) */
-@media (max-width: 768px) {
-  .book-ui {
-    grid-template-columns: 1fr;
-  }
-
-  .page {
-    max-height: 40vh;
-  }
+  height: auto;
 }
