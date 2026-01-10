@@ -1,4 +1,4 @@
-// --- Mobile viewport fix (sets --vh so 100vh is accurate) ---
+// === Mobile viewport fix (sets --vh so 100vh matches real usable height) ===
 (function () {
   function setVh() {
     const vh = window.innerHeight * 0.01;
@@ -8,6 +8,24 @@
   window.addEventListener('resize', setVh);
 })();
 
+// === Mobile background swapper ===
+(function() {
+  const img = document.querySelector('.scene-bg');
+  if (!img) return;
+
+  const mobileSrc = img.getAttribute('data-mobile-src');
+  const desktopSrc = img.getAttribute('src');
+
+  function apply() {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    img.src = isMobile ? mobileSrc : desktopSrc;
+  }
+
+  apply();
+  window.addEventListener('resize', apply);
+})();
+
+// === Embers system ===
 (() => {
   const anchor = document.getElementById("bookAnchor");
   const canvas = document.getElementById("embers");
@@ -20,34 +38,13 @@
   const sparks = [];
   const MAX = 80;
 
-  // ================================
-  // FIXED SPAWN REGIONS IN CANVAS
-  // ================================
+  const spawnTopBox = { x: 0.30, y: 0.20, w: 0.44, h: 0.08 };
+  const spawnRightBox = { x: 0.60, y: 0.14, w: 0.16, h: 0.55 };
 
-  // Top lip band – extended farther right
-  const spawnTopBox = {
-    x: 0.30,
-    y: 0.20,
-    w: 0.44,
-    h: 0.08
-  };
-
-  // Vertical band that hugs the right edge of the book
-  const spawnRightBox = {
-    x: 0.60,
-    y: 0.14,
-    w: 0.16,
-    h: 0.55
-  };
-
-  function rand(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+  function rand(min, max) { return Math.random() * (max - min) + min; }
 
   function resize() {
     let rect = canvas.getBoundingClientRect();
-
-    // fallback if zero (can happen during init or hidden layout)
     if (rect.width === 0 || rect.height === 0) {
       rect = {
         width: canvas.offsetWidth || anchor.offsetWidth,
@@ -56,7 +53,6 @@
     }
 
     dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-
     w = Math.max(1, Math.floor(rect.width));
     h = Math.max(1, Math.floor(rect.height));
 
@@ -65,57 +61,37 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // =======================================
-  // EMBER SPAWN LOGIC — TWO SEPARATE PATHS
-  // =======================================
   function spawnOne() {
-    const useTopPath = Math.random() < 0.6; // 60% top, 40% right
-
+    const useTopPath = Math.random() < 0.6;
     let x, y;
 
     if (useTopPath) {
-      // --------- TOP PATH ----------
-      const t = Math.random(); // 0 → 1 along the band
+      const t = Math.random();
       let nx = t;
-      let ny = 0.5;            // middle of band vertically
-
-      // Light jitter so it's not a perfect line
+      let ny = 0.5;
       nx += (Math.random() - 0.5) * 0.10;
       ny += (Math.random() - 0.5) * 0.12;
-
-      // Clamp within [0,1]
       nx = Math.min(0.98, Math.max(0.02, nx));
       ny = Math.min(0.98, Math.max(0.02, ny));
-
       x = (spawnTopBox.x + nx * spawnTopBox.w) * w;
       y = (spawnTopBox.y + ny * spawnTopBox.h) * h;
-
     } else {
-      // --------- RIGHT PATH ----------
-      const t = Math.random(); // 0 → 1 down the band
-      let nx = 0.5;            // center horizontally in right band
-      let ny = t;              // 0 → 1 from top to bottom
-
-      // Slight inward lean + jitter
+      const t = Math.random();
+      let nx = 0.5;
+      let ny = t;
       nx += (Math.random() - 0.5) * 0.20;
       ny += (Math.random() - 0.5) * 0.10;
-
       nx = Math.min(0.98, Math.max(0.02, nx));
       ny = Math.min(0.98, Math.max(0.02, ny));
-
       x = (spawnRightBox.x + nx * spawnRightBox.w) * w;
       y = (spawnRightBox.y + ny * spawnRightBox.h) * h;
     }
 
-    // Ember motion: same for both paths
-    const vx = (Math.random() - 0.5) * 0.15; // slight sideways drift
-    const vy = rand(-0.65, -0.40);           // rise up
+    const vx = (Math.random() - 0.5) * 0.15;
+    const vy = rand(-0.65, -0.40);
 
     sparks.push({
-      x,
-      y,
-      vx,
-      vy,
+      x, y, vx, vy,
       r: rand(0.8, 2.2),
       a: rand(0.4, 0.9),
       life: rand(32, 70),
@@ -129,15 +105,11 @@
   function step() {
     raf = requestAnimationFrame(step);
     ctx.clearRect(0, 0, w, h);
-
-    // spawn a few per frame
     for (let i = 0; i < 3; i++) spawnOne();
 
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
       s.t++;
-
-      // drift + swirl
       s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06;
       s.y += s.vy;
 
@@ -151,13 +123,11 @@
         continue;
       }
 
-      // outer ember
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
       ctx.fill();
 
-      // hot core
       if (Math.random() < 0.30) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
@@ -165,7 +135,6 @@
         ctx.fill();
       }
 
-      // bounds kill
       if (s.t >= s.life || s.y < -12 || s.x < -12 || s.x > w + 12) {
         sparks.splice(i, 1);
       }
@@ -191,13 +160,11 @@
     }, 120);
   }
 
-  // click placeholder
   anchor.addEventListener("click", () => {
     anchor.classList.add("clicked");
     setTimeout(() => anchor.classList.remove("clicked"), 240);
   });
 
-  // hover/focus triggers
   anchor.addEventListener("mouseenter", start);
   anchor.addEventListener("mouseleave", stop);
   anchor.addEventListener("focusin", start);
