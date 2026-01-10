@@ -1,176 +1,136 @@
-// === Mobile viewport fix (sets --vh so 100vh matches real usable height) ===
-(function () {
-  function setVh() {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+// scene.js
+
+// --------------
+// 1. Layout config
+// --------------
+// All positions are % of scene box (0–100). Easy to tweak.
+// Desktop and mobile can diverge if you need tighter tuning later.
+
+const BUTTON_LAYOUT = {
+  desktop: {
+    book:  { x: 50, y: 57, size: 18 }, // main stag book on stand
+    skull: { x: 80, y: 59, size: 13 }, // skull on right
+    scroll:{ x: 18, y: 60, size: 15 }, // scroll/open book cluster left
+    beaker:{ x: 69, y: 44, size: 11 }  // bottle cluster behind skull
+  },
+  mobile: {
+    // start same as desktop; tweak later as needed
+    book:  { x: 50, y: 57, size: 20 },
+    skull: { x: 80, y: 60, size: 15 },
+    scroll:{ x: 18, y: 62, size: 17 },
+    beaker:{ x: 69, y: 45, size: 13 }
   }
-  setVh();
-  window.addEventListener('resize', setVh);
-})();
+};
 
-// === Mobile background swapper ===
-(function() {
-  const img = document.querySelector('.scene-bg');
-  if (!img) return;
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
 
-  const mobileSrc = img.getAttribute('data-mobile-src');
-  const desktopSrc = img.getAttribute('src');
+// --------------
+// 2. Apply layout to buttons
+// --------------
 
-  function apply() {
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    img.src = isMobile ? mobileSrc : desktopSrc;
-  }
+function applyButtonLayout() {
+  const mode = isMobileLayout() ? "mobile" : "desktop";
+  const config = BUTTON_LAYOUT[mode];
 
-  apply();
-  window.addEventListener('resize', apply);
-})();
+  const map = {
+    book:  document.getElementById("btn-book"),
+    skull: document.getElementById("btn-skull"),
+    scroll:document.getElementById("btn-scroll"),
+    beaker:document.getElementById("btn-beaker")
+  };
 
-// === Embers system ===
-(() => {
-  const anchor = document.getElementById("bookAnchor");
-  const canvas = document.getElementById("embers");
-  const ctx = canvas.getContext("2d", { alpha: true });
-
-  let w = 0, h = 0, dpr = 1;
-  let running = false;
-  let raf = 0;
-
-  const sparks = [];
-  const MAX = 80;
-
-  const spawnTopBox = { x: 0.30, y: 0.20, w: 0.44, h: 0.08 };
-  const spawnRightBox = { x: 0.60, y: 0.14, w: 0.16, h: 0.55 };
-
-  function rand(min, max) { return Math.random() * (max - min) + min; }
-
-  function resize() {
-    let rect = canvas.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) {
-      rect = {
-        width: canvas.offsetWidth || anchor.offsetWidth,
-        height: canvas.offsetHeight || anchor.offsetHeight
-      };
-    }
-
-    dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    w = Math.max(1, Math.floor(rect.width));
-    h = Math.max(1, Math.floor(rect.height));
-
-    canvas.width  = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function spawnOne() {
-    const useTopPath = Math.random() < 0.6;
-    let x, y;
-
-    if (useTopPath) {
-      const t = Math.random();
-      let nx = t;
-      let ny = 0.5;
-      nx += (Math.random() - 0.5) * 0.10;
-      ny += (Math.random() - 0.5) * 0.12;
-      nx = Math.min(0.98, Math.max(0.02, nx));
-      ny = Math.min(0.98, Math.max(0.02, ny));
-      x = (spawnTopBox.x + nx * spawnTopBox.w) * w;
-      y = (spawnTopBox.y + ny * spawnTopBox.h) * h;
-    } else {
-      const t = Math.random();
-      let nx = 0.5;
-      let ny = t;
-      nx += (Math.random() - 0.5) * 0.20;
-      ny += (Math.random() - 0.5) * 0.10;
-      nx = Math.min(0.98, Math.max(0.02, nx));
-      ny = Math.min(0.98, Math.max(0.02, ny));
-      x = (spawnRightBox.x + nx * spawnRightBox.w) * w;
-      y = (spawnRightBox.y + ny * spawnRightBox.h) * h;
-    }
-
-    const vx = (Math.random() - 0.5) * 0.15;
-    const vy = rand(-0.65, -0.40);
-
-    sparks.push({
-      x, y, vx, vy,
-      r: rand(0.8, 2.2),
-      a: rand(0.4, 0.9),
-      life: rand(32, 70),
-      t: 0,
-      tw: rand(0.004, 0.012)
-    });
-
-    if (sparks.length > MAX) sparks.shift();
-  }
-
-  function step() {
-    raf = requestAnimationFrame(step);
-    ctx.clearRect(0, 0, w, h);
-    for (let i = 0; i < 3; i++) spawnOne();
-
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const s = sparks[i];
-      s.t++;
-      s.x += s.vx + Math.sin((s.t * 0.08) + s.x * 0.01) * 0.06;
-      s.y += s.vy;
-
-      const p = s.t / s.life;
-      const alphaBase = s.a * (1 - p);
-      const tw = 0.65 + Math.sin(s.t * (10 * s.tw)) * 0.35;
-      const aFinal = alphaBase * tw;
-
-      if (aFinal <= 0) {
-        sparks.splice(i, 1);
-        continue;
-      }
-
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(118, 192, 255, ${aFinal})`;
-      ctx.fill();
-
-      if (Math.random() < 0.30) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, Math.max(0.5, s.r * 0.45), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200, 235, 255, ${aFinal * 0.7})`;
-        ctx.fill();
-      }
-
-      if (s.t >= s.life || s.y < -12 || s.x < -12 || s.x > w + 12) {
-        sparks.splice(i, 1);
-      }
-    }
-  }
-
-  function start() {
-    if (running) return;
-    running = true;
-    resize();
-    ctx.clearRect(0, 0, w, h);
-    sparks.length = 0;
-    cancelAnimationFrame(raf);
-    step();
-  }
-
-  function stop() {
-    running = false;
-    cancelAnimationFrame(raf);
-    raf = 0;
-    setTimeout(() => {
-      if (!running) ctx.clearRect(0, 0, w, h);
-    }, 120);
-  }
-
-  anchor.addEventListener("click", () => {
-    anchor.classList.add("clicked");
-    setTimeout(() => anchor.classList.remove("clicked"), 240);
+  Object.entries(config).forEach(([key, cfg]) => {
+    const el = map[key];
+    if (!el) return;
+    el.style.setProperty("--x", cfg.x + "%");
+    el.style.setProperty("--y", cfg.y + "%");
+    el.style.setProperty("--size", cfg.size + "%");
   });
+}
 
-  anchor.addEventListener("mouseenter", start);
-  anchor.addEventListener("mouseleave", stop);
-  anchor.addEventListener("focusin", start);
-  anchor.addEventListener("focusout", stop);
+// adjust layout on load + resize
+window.addEventListener("load", () => {
+  // swap background for mobile
+  const bg = document.getElementById("scene-bg");
+  if (isMobileLayout()) {
+    bg.src = "./lore-assets/stag-study-mobile.png";
+  }
 
-  window.addEventListener("resize", () => {
-    if (running) resize();
+  applyButtonLayout();
+});
+
+window.addEventListener("resize", () => {
+  applyButtonLayout();
+});
+
+// --------------
+// 3. Book modal wiring
+// --------------
+
+const bookButton   = document.getElementById("btn-book");
+const bookModal    = document.getElementById("book-modal");
+const bookCloseBtn = document.getElementById("book-modal-close");
+const backdrop     = document.querySelector(".book-modal-backdrop");
+
+// simple demo content; you will replace with real lore later
+const pageLeft  = document.getElementById("page-left");
+const pageRight = document.getElementById("page-right");
+
+pageLeft.textContent = `
+In the dim light of the Stag King's study, every page carries a cost.
+Some debts are paid in coin. Others are paid in memory.
+`;
+
+pageRight.textContent = `
+Those who open this book are bound to remember what they read.
+The ink is older than the kingdom, and it does not forgive the idle.
+`;
+
+// open / close helpers
+function openBookModal() {
+  bookModal.classList.add("is-open");
+  bookModal.setAttribute("aria-hidden", "false");
+}
+
+function closeBookModal() {
+  bookModal.classList.remove("is-open");
+  bookModal.setAttribute("aria-hidden", "true");
+}
+
+if (bookButton) {
+  bookButton.addEventListener("click", openBookModal);
+}
+
+[bookCloseBtn, backdrop].forEach(el => {
+  if (!el) return;
+  el.addEventListener("click", closeBookModal);
+});
+
+// --------------
+// 4. Other buttons: stubs for now
+// --------------
+// These are separated so you can easily swap behavior later.
+
+const skullBtn  = document.getElementById("btn-skull");
+const scrollBtn = document.getElementById("btn-scroll");
+const beakerBtn = document.getElementById("btn-beaker");
+
+if (skullBtn) {
+  skullBtn.addEventListener("click", () => {
+    console.log("Skull clicked – hook up skull modal or effect here.");
   });
-})();
+}
+
+if (scrollBtn) {
+  scrollBtn.addEventListener("click", () => {
+    console.log("Scroll clicked – hook up scroll lore here.");
+  });
+}
+
+if (beakerBtn) {
+  beakerBtn.addEventListener("click", () => {
+    console.log("Beaker clicked – hook up potion effect here.");
+  });
+}
