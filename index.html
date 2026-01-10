@@ -2,36 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
   <title>Stag Lore – Study</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- IMPORTANT: this must match the filename exactly -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
   <main class="scene-shell">
-    <div class="scene" id="scene">
-      <img id="scene-bg" class="scene-bg" src="./lore-assets/stag-study.png" alt="study">
+    <div id="scene" class="scene">
+      <!-- Background image (JS will swap to mobile version if needed) -->
+      <img
+        id="scene-bg"
+        class="scene-bg"
+        src="./lore-assets/stag-study.png"
+        alt="Stag study background"
+      />
 
-      <!-- Hotspots (buttons) -->
-      <button class="hotspot" id="btn-book">
-        <img src="./lore-assets/book-button.png" alt="">
+      <!-- Hotspot buttons (each has its own ID) -->
+      <button class="hotspot" id="btn-book" aria-label="Book">
+        <img src="./lore-assets/book-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-skull">
-        <img src="./lore-assets/skull-button.png" alt="">
+      <button class="hotspot" id="btn-skull" aria-label="Skull">
+        <img src="./lore-assets/skull-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-scroll">
-        <img src="./lore-assets/scroll-button.png" alt="">
+      <button class="hotspot" id="btn-scroll" aria-label="Scroll">
+        <img src="./lore-assets/scroll-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-beaker">
-        <img src="./lore-assets/beaker-button.png" alt="">
+      <button class="hotspot" id="btn-beaker" aria-label="Beaker">
+        <img src="./lore-assets/beaker-button.png" alt="" />
       </button>
-
     </div>
   </main>
 
+  <!-- ONE script file; again, filename must match exactly -->
   <script src="script.js"></script>
 </body>
 </html>
