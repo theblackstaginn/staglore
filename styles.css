@@ -72,7 +72,13 @@ body {
     height: auto;
   }
 }
-
+@media (max-width: 767px) {
+  .scene-bg {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+  }
+}
 /* hot book */
 .book-anchor {
   position: absolute;
