@@ -1,145 +1,166 @@
-/* ==========================================================
-   Stag Lore — fullscreen scene + hot book overlay + embers
-   Mobile + desktop image swap (no stone panels)
-   ========================================================== */
-
 :root {
-  --text: rgba(231,226,219,.92);
-  --bg-dark: #050608;
-
-  --vh: 1vh;
-
-  /* hot book coords (do not touch) */
-  --bookX: 55.5%;
-  --bookY: 45.5%;
-  --bookWidth: 29%;
+  --scene-max-width: 1200px;
+  --hotspot-size-desktop: 14%; /* default width of button images */
+  --hotspot-size-mobile: 18%;
+  --book-modal-bg: rgba(0,0,0,.82);
+  --page-bg: #f2e6cf;
+  --page-radius: 10px;
 }
 
-html,
+/* Basic reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  padding: 0;
-  width: 100%;
-  height: calc(var(--vh) * 100);
-  overflow: hidden;
-  background: #000;
-  color: var(--text);
+  background: #050608;
+  color: #f4f1ea;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-body {
+/* ===== Scene ===== */
+
+.scene-shell {
+  min-height: 100vh;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .scene {
   position: relative;
-  flex: 1;
   width: 100%;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  max-width: var(--scene-max-width);
+  /* maintain aspect ratio based on background (approx 16:9) */
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
-.scene-inner {
+.scene-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ===== Hotspots ===== */
+
+.hotspot {
+  position: absolute;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  /* coords come from CSS vars set in JS */
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: var(--size, var(--hotspot-size-desktop));
+  aspect-ratio: 1 / 1;
+}
+
+.hotspot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* subtle hover on desktop */
+@media (hover: hover) and (pointer: fine) {
+  .hotspot:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* mobile tweaks */
+@media (max-width: 768px) {
+  .hotspot {
+    width: var(--size, var(--hotspot-size-mobile));
+  }
+}
+
+/* ===== Book Modal ===== */
+
+.book-modal {
+  position: fixed;
+  inset: 0;
+  display: none;       /* toggled via JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.book-modal.is-open {
+  display: flex;
+}
+
+.book-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--book-modal-bg);
+  backdrop-filter: blur(4px);
+}
+
+.book-modal-inner {
   position: relative;
-  z-index: 2;
+  max-width: 960px;
+  width: 94%;
+  max-height: 90vh;
+  z-index: 21;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100vw;
-  max-height: calc(var(--vh) * 100);
 }
 
-/* desktop behavior (original) */
-.scene-bg {
-  display: block;
-  max-width: 100vw;
-  max-height: calc(var(--vh) * 100);
-  width: auto;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-}
-
-/* mobile portrait: fill width, reduce top/bottom bars */
-@media (max-width: 767px) {
-  .scene-bg {
-    max-width: 100vw;
-    max-height: none;
-    width: 100vw;
-    height: auto;
-  }
-}
-@media (max-width: 767px) {
-  .scene-bg {
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-  }
-}
-/* hot book */
-.book-anchor {
+.book-modal-close {
   position: absolute;
-  left: var(--bookX);
-  top: var(--bookY);
-  width: var(--bookWidth);
-  transform: translate(-50%, -50%);
-  padding: 0;
-  margin: 0;
+  top: 8px;
+  right: 12px;
   border: none;
   background: transparent;
+  color: #f4f1ea;
+  font-size: 2rem;
   cursor: pointer;
-  display: block;
-  outline: none;
-  z-index: 10;
-  -webkit-tap-highlight-color: transparent;
+  z-index: 22;
 }
 
-.shadow-ambient,
-.shadow-contact {
-  position: absolute;
-  inset: 6% 4% 3% 4%;
-  pointer-events: none;
-  border-radius: 999px;
-}
-
-.shadow-ambient {
-  background: radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.75), transparent 70%);
-  filter: blur(22px);
-  opacity: 0.45;
-}
-
-.shadow-contact {
-  background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.95), transparent 75%);
-  filter: blur(10px);
-  opacity: 0.7;
-}
-
-.book-img {
+/* Book UI as 2-page spread on wide screens */
+.book-ui {
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   width: 100%;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
 }
 
-.book-anchor:hover .book-img,
-.book-anchor:focus-visible .book-img {
-  transform: translateY(-2px);
-  transition: transform 160ms ease-out;
+.page {
+  background: var(--page-bg);
+  border-radius: var(--page-radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .7);
+  padding: 16px 18px;
+  overflow: hidden;
 }
 
-.embers {
-  position: absolute;
-  top: -20%;
-  left: -15%;
-  width: 130%;
-  height: 140%;
-  pointer-events: none;
-  z-index: 2;
-  background: transparent;
+.page-inner {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Mobile: stack pages vertically (like scrolling grimoire) */
+@media (max-width: 768px) {
+  .book-ui {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    max-height: 40vh;
+  }
 }
