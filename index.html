@@ -2,47 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>Stag Lore</title>
-
-  <!-- Preload key images -->
-  <link rel="preload" href="./assets/stag-study.png" as="image">
-  <link rel="preload" href="./assets/hot-book.png" as="image">
-  <link rel="preload" href="./assets/stag-study-mobile.png" as="image">
-
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Stag Lore – Study</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <main class="scene">
-    <div class="scene-inner">
+
+  <main class="scene-shell">
+    <div class="scene" id="scene">
+      <!-- Background image (swapped to mobile in JS) -->
       <img
+        id="scene-bg"
         class="scene-bg"
-        src="./assets/stag-study.png"
-        data-mobile-src="./assets/stag-study-mobile.png"
-        alt="Stag grimoire in a study full of artifacts"
-        draggable="false"
+        src="./lore-assets/stag-study.png"
+        alt="Stag study background"
       />
 
-      <button id="bookAnchor" class="book-anchor" type="button">
-        <span class="shadow-ambient"></span>
-        <span class="shadow-contact"></span>
+      <!-- Hotspot buttons -->
+      <button class="hotspot" id="btn-book" aria-label="Book hotspot">
+        <img src="./lore-assets/book-button.png" alt="">
+      </button>
 
-        <img
-          class="book-img"
-          src="./assets/hot-book.png"
-          alt="Enchanted stag grimoire"
-          draggable="false"
-        />
+      <button class="hotspot" id="btn-skull" aria-label="Skull hotspot">
+        <img src="./lore-assets/skull-button.png" alt="">
+      </button>
 
-        <canvas id="embers" class="embers"></canvas>
+      <button class="hotspot" id="btn-scroll" aria-label="Scroll hotspot">
+        <img src="./lore-assets/scroll-button.png" alt="">
+      </button>
+
+      <button class="hotspot" id="btn-beaker" aria-label="Beaker hotspot">
+        <img src="./lore-assets/beaker-button.png" alt="">
       </button>
     </div>
   </main>
 
-  <script src="./script.js" defer></script>
+  <!-- Book modal shell (content to be wired next) -->
+  <div id="book-modal" class="book-modal" aria-hidden="true">
+    <div class="book-modal-backdrop"></div>
+    <div class="book-modal-inner">
+      <button class="book-modal-close" id="book-modal-close" aria-label="Close book">×</button>
+
+      <div class="book-ui">
+        <div class="page page-left">
+          <div class="page-inner" id="page-left"></div>
+        </div>
+        <div class="page page-right">
+          <div class="page-inner" id="page-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scene.js"></script>
 </body>
 </html>
