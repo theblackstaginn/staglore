@@ -24,12 +24,12 @@
   // FIXED SPAWN REGIONS IN CANVAS
   // ================================
 
-  // Top lip band – now extended farther right
+  // Top lip band – extended farther right
   const spawnTopBox = {
-    x: 0.30, // was 0.34; move a bit left
-    y: 0.20, // vertical position of top band (sitting on book top)
-    w: 0.44, // was 0.36; wider so it reaches top-right corner
-    h: 0.08  // thin vertical band
+    x: 0.30,
+    y: 0.20,
+    w: 0.44,
+    h: 0.08
   };
 
   // Vertical band that hugs the right edge of the book
@@ -75,15 +75,13 @@
 
     if (useTopPath) {
       // --------- TOP PATH ----------
-      // Horizontal band across the top lip (inside spawnTopBox)
-
       const t = Math.random(); // 0 → 1 along the band
       let nx = t;
       let ny = 0.5;            // middle of band vertically
 
       // Light jitter so it's not a perfect line
-      nx += (Math.random() - 0.5) * 0.10; // a bit narrower horizontally
-      ny += (Math.random() - 0.5) * 0.12; // tightened vertical spread
+      nx += (Math.random() - 0.5) * 0.10;
+      ny += (Math.random() - 0.5) * 0.12;
 
       // Clamp within [0,1]
       nx = Math.min(0.98, Math.max(0.02, nx));
@@ -94,8 +92,6 @@
 
     } else {
       // --------- RIGHT PATH ----------
-      // Mostly vertical band down the right edge (inside spawnRightBox)
-
       const t = Math.random(); // 0 → 1 down the band
       let nx = 0.5;            // center horizontally in right band
       let ny = t;              // 0 → 1 from top to bottom
@@ -113,7 +109,7 @@
 
     // Ember motion: same for both paths
     const vx = (Math.random() - 0.5) * 0.15; // slight sideways drift
-    const vy = rand(-0.65, -0.40);          // rise up
+    const vy = rand(-0.65, -0.40);           // rise up
 
     sparks.push({
       x,
