@@ -1,46 +1,35 @@
 /* ==========================================================
-   Stag Lore — Fullscreen scene + hot book overlay + embers
-   (NO stone panels)
+   Stag Lore — fullscreen scene + hot book overlay + embers
+   Mobile + desktop image swap (no stone panels)
    ========================================================== */
 
-/* Root variables */
 :root {
   --text: rgba(231,226,219,.92);
   --bg-dark: #050608;
 
-  /* Mobile-safe viewport unit (set in JS) */
   --vh: 1vh;
 
-  /* Book placement within the scene box
-     (percentage of .scene-inner width/height) */
-  --bookX: 55.5%;   /* horizontal center of hot book */
-  --bookY: 45.5%;   /* vertical center of hot book */
-  --bookWidth: 29%; /* width relative to scene-inner width */
-
-  /* Glow colors (if you want them later) */
-  --glowA: rgba(255,168,64,.22);
-  --glowB: rgba(255,120,40,.12);
+  /* hot book coords (do not touch) */
+  --bookX: 55.5%;
+  --bookY: 45.5%;
+  --bookWidth: 29%;
 }
-
-/* ---------- Global layout ---------- */
 
 html,
 body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: calc(var(--vh) * 100); /* true viewport height */
-  overflow: hidden;              /* no scroll */
-  background: #000;              /* bars behind image */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  height: calc(var(--vh) * 100);
+  overflow: hidden;
+  background: #000;
   color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
   display: flex;
 }
-
-/* ---------- Scene container ---------- */
 
 .scene {
   position: relative;
@@ -49,24 +38,21 @@ body {
   height: calc(var(--vh) * 100);
   display: flex;
   justify-content: center;
-  align-items: center;   /* center the study vertically */
+  align-items: center;
   overflow: hidden;
 }
 
-/* Central scene box (study + book) */
 .scene-inner {
   position: relative;
   z-index: 2;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   max-width: 100vw;
   max-height: calc(var(--vh) * 100);
 }
 
-/* Background study image: preserves aspect ratio, full height */
+/* desktop behavior (original) */
 .scene-bg {
   display: block;
   max-width: 100vw;
@@ -77,17 +63,23 @@ body {
   pointer-events: none;
 }
 
-/* ---------- Hot book button ---------- */
+/* mobile portrait: fill width, reduce top/bottom bars */
+@media (max-width: 767px) {
+  .scene-bg {
+    max-width: 100vw;
+    max-height: none;
+    width: 100vw;
+    height: auto;
+  }
+}
 
+/* hot book */
 .book-anchor {
   position: absolute;
-
-  left:  var(--bookX);
-  top:   var(--bookY);
+  left: var(--bookX);
+  top: var(--bookY);
   width: var(--bookWidth);
-
   transform: translate(-50%, -50%);
-
   padding: 0;
   margin: 0;
   border: none;
@@ -96,11 +88,8 @@ body {
   display: block;
   outline: none;
   z-index: 10;
-
   -webkit-tap-highlight-color: transparent;
 }
-
-/* Shadows under hot book */
 
 .shadow-ambient,
 .shadow-contact {
@@ -122,8 +111,6 @@ body {
   opacity: 0.7;
 }
 
-/* Hot book image */
-
 .book-img {
   position: relative;
   display: block;
@@ -140,8 +127,6 @@ body {
   transition: transform 160ms ease-out;
 }
 
-/* ---------- Embers canvas ---------- */
-
 .embers {
   position: absolute;
   top: -20%;
@@ -152,11 +137,3 @@ body {
   z-index: 2;
   background: transparent;
 }
-
-/* Optional tweak for very small phones
-@media (max-width: 480px) {
-  :root {
-    --bookWidth: 32%;
-  }
-}
-*/
