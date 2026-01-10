@@ -7,17 +7,25 @@
 
 const BUTTON_LAYOUT = {
   desktop: {
-    book:  { x: 50, y: 53, size: 18 },  // raise & shrink a bit
-    skull: { x: 82, y: 54, size: 15 },  // move right & up
-    scroll:{ x: 29, y: 66, size: 18 },  // move right & up slightly
-    beaker:{ x: 68, y: 40, size: 10 }   // move up & shrink
+    // Center book on stand
+    book:  { x: 50, y: 53, size: 18 },
+
+    // Skull on the right (a bit right & up from where it was)
+    skull: { x: 82, y: 54, size: 15 },
+
+    // Rolled scrolls (NOT the open notebook)
+    scroll:{ x: 38, y: 64, size: 18 },
+
+    // Beaker hanging just right of the book
+    beaker:{ x: 66, y: 44, size: 11 }
   },
+
   mobile: {
-    // we leave mobile as-is for now until we see it on your phone
+    // Mobile we’ll rough in now and tune after you send a phone pic
     book:  { x: 50, y: 60, size: 24 },
-    skull: { x: 78, y: 62, size: 20 },
-    scroll:{ x: 26, y: 70, size: 21 },
-    beaker:{ x: 66, y: 47, size: 16 }
+    skull: { x: 80, y: 60, size: 22 },
+    scroll:{ x: 38, y: 68, size: 22 },
+    beaker:{ x: 66, y: 46, size: 17 }
   }
 };
 
