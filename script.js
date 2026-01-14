@@ -1,27 +1,24 @@
 // ---------- CONFIG ----------
 // All positions are percentages in scene space (0–100)
 // so they are easy to tweak without touching CSS.
-//
-// These numbers are *approximate* to get you close.
-// You can nudge them later.
 
 const BUTTON_LAYOUT = {
   desktop: {
-    // Center book on stand
-    book:  { x: 50, y: 53, size: 18 },
+    // Book needs to fully cover the bg book
+    book:  { x: 50, y: 53, size: 22 },
 
-    // Skull on the right (a bit right & up from where it was)
-    skull: { x: 82, y: 54, size: 15 },
+    // Skull basically correct
+    skull: { x: 84, y: 46, size: 15 },
 
-    // Rolled scrolls (NOT the open notebook)
-    scroll:{ x: 38, y: 64, size: 18 },
+    // Scrolls pushed left
+    scroll:{ x: 27, y: 60, size: 16 },
 
-    // Beaker hanging just right of the book
-    beaker:{ x: 66, y: 44, size: 11 }
+    // Beaker down + far right
+    beaker:{ x: 70, y: 55, size: 10 }
   },
 
   mobile: {
-    // Mobile we’ll rough in now and tune after you send a phone pic
+    // We will tune these after desktop is locked
     book:  { x: 50, y: 60, size: 24 },
     skull: { x: 80, y: 60, size: 22 },
     scroll:{ x: 38, y: 68, size: 22 },
@@ -55,7 +52,7 @@ function applyButtonLayout() {
   });
 }
 
-// ---------- BACKGROUND SWAP (desktop vs mobile image) ----------
+// ---------- BACKGROUND SWAP (optional) ----------
 
 function updateBackground() {
   const bg = document.getElementById("scene-bg");
@@ -69,17 +66,16 @@ function updateBackground() {
   }
 }
 
-// ---------- BOOTSTRAP ----------
+// ---------- CLICK HANDLERS (stubbed for now) ----------
 
 function initScene() {
   updateBackground();
   applyButtonLayout();
 
-  // hook up click handlers (you can replace these with modals later)
-  const bookBtn = document.getElementById("btn-book");
+  const bookBtn  = document.getElementById("btn-book");
   const skullBtn = document.getElementById("btn-skull");
-  const scrollBtn = document.getElementById("btn-scroll");
-  const beakerBtn = document.getElementById("btn-beaker");
+  const scrollBtn= document.getElementById("btn-scroll");
+  const beakerBtn= document.getElementById("btn-beaker");
 
   if (bookBtn) {
     bookBtn.addEventListener("click", () => {
@@ -103,6 +99,7 @@ function initScene() {
   }
 }
 
+// Bind events
 window.addEventListener("load", initScene);
 window.addEventListener("resize", () => {
   updateBackground();
