@@ -11,7 +11,7 @@ const BUTTON_LAYOUT = {
     skull: { x: 85, y: 56, size: 14 },
 
     // Scrolls pushed left
-    scroll:{ x: 11, y: 71, size: 22 },
+    scroll:{ x: 11, y: 70, size: 22 },
 
     // Beaker down + far right
     beaker:{ x: 93, y: 85, size: 14 }
