@@ -5,13 +5,13 @@
 const BUTTON_LAYOUT = {
   desktop: {
     // Book needs to fully cover the bg book
-    book:  { x: 50, y: 53, size: 22 },
+    book:  { x: 50, y: 53, size: 28 },
 
     // Skull basically correct
-    skull: { x: 84, y: 46, size: 15 },
+    skull: { x: 84, y: 49, size: 15 },
 
     // Scrolls pushed left
-    scroll:{ x: 27, y: 60, size: 16 },
+    scroll:{ x: 10, y: 65, size: 16 },
 
     // Beaker down + far right
     beaker:{ x: 70, y: 55, size: 10 }
