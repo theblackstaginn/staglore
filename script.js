@@ -8,13 +8,13 @@ const BUTTON_LAYOUT = {
     book:  { x: 50, y: 53, size: 28 },
 
     // Skull basically correct
-    skull: { x: 84, y: 49, size: 15 },
+    skull: { x: 84, y: 52, size: 13 },
 
     // Scrolls pushed left
-    scroll:{ x: 10, y: 65, size: 16 },
+    scroll:{ x: 10, y: 70, size: 20 },
 
     // Beaker down + far right
-    beaker:{ x: 70, y: 55, size: 10 }
+    beaker:{ x: 90, y: 75, size: 10 }
   },
 
   mobile: {
