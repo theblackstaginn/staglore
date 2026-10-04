@@ -1,15 +1,7 @@
 :root {
   --scene-max-width: 1400px;
-
-  /*
-   * JS replaces these with the natural dimensions of the artwork.
-   * They only exist as a no-flash fallback during the first image load.
-   */
-  --scene-ratio: 1.7777778;
-  --scene-aspect: 16 / 9;
-
-  --hotspot-size-desktop: 14%;
-  --hotspot-size-mobile: 18%;
+  --hotspot-size-landscape: 14%;
+  --hotspot-size-portrait: 18%;
 }
 
 *,
@@ -31,9 +23,10 @@ html {
 }
 
 body {
+  min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
   background: #050608;
   color: #f4f1ea;
   font-family:
@@ -42,75 +35,87 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* =========================================================
    SCENE GEOMETRY
 
-   The scene box always uses the natural aspect ratio of the
-   selected artwork. The art and hotspots therefore share one
-   coordinate space and can no longer drift apart from cropping.
+   The scene shrink-wraps the actual rendered artwork.
+   The artwork itself is therefore the hotspot coordinate space.
+   No JS aspect-ratio math is required.
    ========================================================= */
 
 .scene-shell {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  display: grid;
-  place-items: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   overflow: hidden;
   background: #050608;
+
+  touch-action: pan-y;
 }
 
 .scene {
   position: relative;
-  transform: translate3d(0, 0, 0);
+  display: inline-block;
 
-  /*
-   * Width is constrained by BOTH viewport width and viewport height.
-   * The second limit prevents a landscape scene from becoming taller
-   * than the device while preserving the artwork's exact proportions.
-   */
-  width: min(
-    100vw,
-    var(--scene-max-width),
-    calc(100dvh * var(--scene-ratio))
-  );
-  aspect-ratio: var(--scene-aspect);
+  width: auto;
+  height: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
 
   flex: 0 0 auto;
-  margin: 0 auto;
+  margin: 0;
   overflow: hidden;
+  line-height: 0;
+
   background: #050608;
+  transform: translate3d(0, 0, 0);
 }
 
 .scene-picture {
-  position: absolute;
-  inset: 0;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
 }
 
 .scene-bg {
   display: block;
-  width: 100%;
-  height: 100%;
+
+  width: auto;
+  height: auto;
+  max-width: min(100vw, var(--scene-max-width));
+  max-height: 100vh;
+  max-height: 100dvh;
+
   object-fit: contain;
+
   user-select: none;
+  -webkit-user-select: none;
   -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 /* =========================================================
    HOTSPOTS
-   Percentages are now percentages of the ARTWORK itself.
+
+   --x and --y are percentages of the rendered artwork itself.
    ========================================================= */
 
 .hotspot {
   position: absolute;
   left: var(--x, 50%);
   top: var(--y, 50%);
-  width: var(--size, var(--hotspot-size-desktop));
+
+  width: var(--size, var(--hotspot-size-landscape));
   aspect-ratio: 1 / 1;
 
   padding: 0;
@@ -123,15 +128,37 @@ body {
 
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+
+  opacity: 1;
+  transition:
+    opacity 100ms ease,
+    transform 130ms ease;
+}
+
+/*
+ * Hotspots stay hidden until the selected artwork is fully loaded.
+ * This prevents them from appearing in a stale coordinate system.
+ */
+.scene:not(.is-ready) .hotspot,
+.scene.is-switching .hotspot {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scene.ptr-active .hotspot {
+  pointer-events: none;
 }
 
 .hotspot img {
   display: block;
   width: 100%;
   height: 100%;
+
   object-fit: contain;
   pointer-events: none;
+
   user-select: none;
+  -webkit-user-select: none;
   -webkit-user-drag: none;
 }
 
@@ -147,22 +174,14 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (orientation: portrait) {
   .hotspot {
-    width: var(--size, var(--hotspot-size-mobile));
+    width: var(--size, var(--hotspot-size-portrait));
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .hotspot {
-    transition: none;
-  }
-}
-
 
 /* =========================================================
    PULL TO REFRESH
-   Full-screen scene version: the artwork itself follows the pull.
    ========================================================= */
 
 .scene.ptr-pulling {
@@ -198,12 +217,16 @@ body {
 
   font-size: 0.76rem;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: 0.025em;
 
   opacity: 0;
   pointer-events: none;
   transform: translate3d(-50%, -68px, 0);
-  transition: opacity 140ms ease, transform 140ms ease;
+
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
 }
 
 .stag-ptr.is-pulling,
@@ -227,5 +250,18 @@ body {
 @keyframes stag-ptr-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot,
+  .scene.ptr-settling,
+  .stag-ptr,
+  .stag-ptr-mark {
+    transition: none;
+  }
+
+  .stag-ptr.is-refreshing .stag-ptr-mark {
+    animation: none;
   }
 }
