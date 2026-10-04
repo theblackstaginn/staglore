@@ -187,6 +187,15 @@ body {
   .hotspot {
     width: var(--size, var(--hotspot-size-portrait));
   }
+
+  /*
+   * Portrait uses the objects baked into the mobile artwork itself.
+   * Keep the hotspot PNGs loaded so their intrinsic dimensions still
+   * define the tap areas, but make them visually transparent.
+   */
+  .hotspot img {
+    opacity: 0;
+  }
 }
 
 /* =========================================================
