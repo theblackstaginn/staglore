@@ -18,11 +18,10 @@ const BUTTON_LAYOUT = {
   },
 
   mobile: {
-    // Existing mobile coordinates preserved for the first geometry test.
-    // Once the artwork is locked, these can be tuned once and stay put.
-    book:   { x: 50, y: 60, size: 24 },
-    skull:  { x: 80, y: 60, size: 22 },
-    scroll: { x: 38, y: 68, size: 22 },
+    // Tuned against the locked mobile artwork.
+    book:   { x: 53, y: 44, size: 32 },
+    skull:  { x: 91, y: 46.5, size: 16 },
+    scroll: { x: 10, y: 49.5, size: 19 },
     beaker: { x: 66, y: 46, size: 17 }
   }
 };
