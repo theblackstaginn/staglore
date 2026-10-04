@@ -33,6 +33,7 @@ html {
 body {
   min-height: 100dvh;
   overflow: hidden;
+  overscroll-behavior-y: none;
   background: #050608;
   color: #f4f1ea;
   font-family:
@@ -63,6 +64,7 @@ body {
 
 .scene {
   position: relative;
+  transform: translate3d(0, 0, 0);
 
   /*
    * Width is constrained by BOTH viewport width and viewport height.
@@ -154,5 +156,76 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hotspot {
     transition: none;
+  }
+}
+
+
+/* =========================================================
+   PULL TO REFRESH
+   Full-screen scene version: the artwork itself follows the pull.
+   ========================================================= */
+
+.scene.ptr-pulling {
+  will-change: transform;
+  transition: none;
+}
+
+.scene.ptr-settling {
+  will-change: transform;
+  transition: transform 180ms ease-out;
+}
+
+.stag-ptr {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 1000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.5rem 0.72rem;
+  border: 1px solid rgba(225, 190, 148, 0.24);
+  border-radius: 999px;
+
+  background: rgba(8, 14, 18, 0.92);
+  color: rgba(244, 241, 234, 0.95);
+
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-50%, -68px, 0);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.stag-ptr.is-pulling,
+.stag-ptr.is-ready,
+.stag-ptr.is-refreshing {
+  opacity: 1;
+}
+
+.stag-ptr-mark {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  transform: rotate(var(--stag-ptr-rotation, 0deg));
+  transition: transform 90ms linear;
+}
+
+.stag-ptr.is-refreshing .stag-ptr-mark {
+  animation: stag-ptr-spin 650ms linear infinite;
+}
+
+@keyframes stag-ptr-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
