@@ -3,8 +3,8 @@
 //
 // Mechanics rule:
 // The rendered artwork IS the coordinate system.
-// CSS makes the scene shrink-wrap the selected image, and these
-// hotspot coordinates are percentages of that image.
+// CSS shrink-wraps the selected artwork and hotspot coordinates
+// are percentages of that rendered image.
 // =========================================================
 
 const PORTRAIT_MEDIA = window.matchMedia("(orientation: portrait)");
@@ -36,11 +36,33 @@ const sceneState = {
   started: false,
   ready: false,
   refreshing: false,
+  layoutEpoch: 0,
   suppressHotspotUntil: 0
 };
 
 function currentMode() {
   return PORTRAIT_MEDIA.matches ? "portrait" : "landscape";
+}
+
+function expectedArtworkFile(mode = currentMode()) {
+  return mode === "portrait"
+    ? "stag-study-mobile.png"
+    : "stag-study.png";
+}
+
+function currentArtworkFile(bg) {
+  if (!bg) return "";
+
+  try {
+    const url = new URL(
+      bg.currentSrc || bg.src,
+      window.location.href
+    );
+
+    return url.pathname.split("/").pop() || "";
+  } catch {
+    return "";
+  }
 }
 
 function withCacheBust(rawUrl) {
@@ -63,15 +85,10 @@ function withCacheBust(rawUrl) {
 function applyCacheBust() {
   if (!CACHE_BUST) return;
 
-  document.querySelectorAll("img[src]").forEach((img) => {
-    const src = img.getAttribute("src");
-    const busted = withCacheBust(src);
-
-    if (busted && busted !== src) {
-      img.src = busted;
-    }
-  });
-
+  /*
+   * Update <source> first so <picture> has the correct cache-busted
+   * candidate before the fallback <img> source is touched.
+   */
   document.querySelectorAll("source[srcset]").forEach((source) => {
     const srcset = source.getAttribute("srcset");
 
@@ -83,14 +100,28 @@ function applyCacheBust() {
         .split(",")
         .map((candidate) => {
           const parts = candidate.trim().split(/\s+/);
-          return [withCacheBust(parts[0]), ...parts.slice(1)].join(" ");
+
+          return [
+            withCacheBust(parts[0]),
+            ...parts.slice(1)
+          ].join(" ");
         })
         .join(", ")
     );
   });
 
+  document.querySelectorAll("img[src]").forEach((img) => {
+    const src = img.getAttribute("src");
+    const busted = withCacheBust(src);
+
+    if (busted && busted !== src) {
+      img.src = busted;
+    }
+  });
+
   window.setTimeout(() => {
     const cleanUrl = new URL(window.location.href);
+
     cleanUrl.searchParams.delete(CACHE_PARAM);
 
     window.history.replaceState(
@@ -110,6 +141,13 @@ function hotspotElements() {
   };
 }
 
+function sceneImages() {
+  return [
+    document.getElementById("scene-bg"),
+    ...document.querySelectorAll(".hotspot img")
+  ].filter(Boolean);
+}
+
 function applyButtonLayout(mode = currentMode()) {
   const cfg = BUTTON_LAYOUT[mode];
   const elements = hotspotElements();
@@ -125,36 +163,166 @@ function applyButtonLayout(mode = currentMode()) {
   });
 }
 
-function markSceneReady() {
-  const scene = document.getElementById("scene");
-  const bg = document.getElementById("scene-bg");
-
-  if (!scene || !bg || !bg.naturalWidth || !bg.naturalHeight) {
-    return;
-  }
-
-  applyButtonLayout();
-
-  scene.dataset.mode = currentMode();
-  scene.dataset.artwork = bg.currentSrc || bg.src;
-  scene.classList.remove("is-switching");
-  scene.classList.add("is-ready");
-
-  sceneState.ready = true;
-}
-
 function markSceneSwitching() {
   const scene = document.getElementById("scene");
 
   if (!scene) return;
 
   sceneState.ready = false;
+
   scene.classList.remove("is-ready");
   scene.classList.add("is-switching");
+  scene.removeAttribute("data-error");
+}
+
+function markSceneReady() {
+  const scene = document.getElementById("scene");
+  const bg = document.getElementById("scene-bg");
+
+  if (!scene || !bg) return;
+
+  applyButtonLayout();
+
+  scene.dataset.mode = currentMode();
+  scene.dataset.artwork = bg.currentSrc || bg.src;
+
+  scene.classList.remove("is-switching");
+  scene.classList.add("is-ready");
+  scene.removeAttribute("data-error");
+
+  sceneState.ready = true;
+}
+
+function markSceneError(kind = "asset") {
+  const scene = document.getElementById("scene");
+
+  if (!scene) return;
+
+  sceneState.ready = false;
+
+  scene.classList.remove("is-ready", "is-switching");
+  scene.dataset.error = kind;
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
+async function waitForExpectedArtwork(bg, mode, epoch) {
+  const expected = expectedArtworkFile(mode);
+
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (epoch !== sceneState.layoutEpoch) {
+      return false;
+    }
+
+    if (
+      bg.complete &&
+      bg.naturalWidth > 0 &&
+      currentArtworkFile(bg) === expected
+    ) {
+      return true;
+    }
+
+    await wait(25);
+  }
+
+  return false;
+}
+
+function waitForImageLoad(img) {
+  if (img.complete && img.naturalWidth > 0) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise((resolve) => {
+    const cleanup = () => {
+      img.removeEventListener("load", onLoad);
+      img.removeEventListener("error", onError);
+    };
+
+    const onLoad = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const onError = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    img.addEventListener("load", onLoad, { once: true });
+    img.addEventListener("error", onError, { once: true });
+  });
+}
+
+async function decodeImage(img) {
+  if (typeof img.decode !== "function") return;
+
+  try {
+    await img.decode();
+  } catch {
+    // A load event is enough to keep the scene functional.
+  }
+}
+
+async function settleSceneForCurrentMode() {
+  const scene = document.getElementById("scene");
+  const bg = document.getElementById("scene-bg");
+
+  if (!scene || !bg) return;
+
+  const epoch = ++sceneState.layoutEpoch;
+  const mode = currentMode();
+
+  markSceneSwitching();
+  applyButtonLayout(mode);
+
+  const artworkReady =
+    await waitForExpectedArtwork(bg, mode, epoch);
+
+  if (
+    epoch !== sceneState.layoutEpoch ||
+    !artworkReady
+  ) {
+    if (epoch === sceneState.layoutEpoch) {
+      markSceneError("artwork");
+    }
+
+    return;
+  }
+
+  const images = sceneImages();
+
+  const results =
+    await Promise.all(images.map(waitForImageLoad));
+
+  if (epoch !== sceneState.layoutEpoch) {
+    return;
+  }
+
+  if (results.some((loaded) => !loaded)) {
+    markSceneError("asset");
+    return;
+  }
+
+  await Promise.all(images.map(decodeImage));
+
+  if (epoch !== sceneState.layoutEpoch) {
+    return;
+  }
+
+  markSceneReady();
 }
 
 function hotspotClickAllowed() {
-  return Date.now() >= sceneState.suppressHotspotUntil;
+  return (
+    sceneState.ready &&
+    !sceneState.refreshing &&
+    Date.now() >= sceneState.suppressHotspotUntil
+  );
 }
 
 function activateHotspot(name) {
@@ -196,53 +364,19 @@ function initScene() {
 
   sceneState.started = true;
 
-  const bg = document.getElementById("scene-bg");
-
-  applyButtonLayout();
-
-  if (bg) {
-    /*
-     * Register image events BEFORE cache busting. A cache-busted image can
-     * load quickly enough that attaching the listener afterward is unsafe.
-     */
-    bg.addEventListener("load", markSceneReady);
-
-    bg.addEventListener("error", () => {
-      const scene = document.getElementById("scene");
-
-      if (scene) {
-        scene.classList.remove("is-ready", "is-switching");
-        scene.dataset.error = "artwork";
-      }
-    });
-  }
-
   bindHotspots();
+
+  /*
+   * Cache-bust before readiness is evaluated. Hotspots stay hidden
+   * until the refreshed background AND all four object images load.
+   */
   applyCacheBust();
 
-  if (bg && bg.complete && bg.naturalWidth) {
-    requestAnimationFrame(markSceneReady);
-  }
+  settleSceneForCurrentMode();
 }
 
 function handleArtworkModeChange() {
-  const bg = document.getElementById("scene-bg");
-
-  markSceneSwitching();
-  applyButtonLayout();
-
-  /*
-   * The <picture> element swaps artwork automatically.
-   * The image load event is the authoritative signal that the new
-   * coordinate space is ready.
-   *
-   * This delayed check covers a source already present in memory.
-   */
-  window.setTimeout(() => {
-    if (bg && bg.complete && bg.naturalWidth) {
-      markSceneReady();
-    }
-  }, 120);
+  settleSceneForCurrentMode();
 }
 
 function initPullToRefresh() {
@@ -254,6 +388,7 @@ function initPullToRefresh() {
   if (!shell || !scene) return;
 
   const indicator = document.createElement("div");
+
   indicator.className = "stag-ptr";
   indicator.setAttribute("aria-hidden", "true");
   indicator.innerHTML =
@@ -262,7 +397,8 @@ function initPullToRefresh() {
 
   document.body.appendChild(indicator);
 
-  const label = indicator.querySelector(".stag-ptr-label");
+  const label =
+    indicator.querySelector(".stag-ptr-label");
 
   const threshold = 74;
   const maxPull = 118;
@@ -274,7 +410,8 @@ function initPullToRefresh() {
   let verticalPull = false;
 
   function setHotspotSuppression(milliseconds = 650) {
-    sceneState.suppressHotspotUntil = Date.now() + milliseconds;
+    sceneState.suppressHotspotUntil =
+      Date.now() + milliseconds;
   }
 
   function finishSettling() {
@@ -288,7 +425,11 @@ function initPullToRefresh() {
     verticalPull = false;
     pullDistance = 0;
 
-    scene.classList.remove("ptr-pulling", "ptr-active");
+    scene.classList.remove(
+      "ptr-pulling",
+      "ptr-active"
+    );
+
     scene.classList.add("ptr-settling");
     scene.style.transform = "";
 
@@ -298,8 +439,14 @@ function initPullToRefresh() {
       "is-refreshing"
     );
 
-    indicator.style.transform = "translate3d(-50%, -68px, 0)";
-    indicator.style.setProperty("--stag-ptr-rotation", "0deg");
+    indicator.style.transform =
+      "translate3d(-50%, -68px, 0)";
+
+    indicator.style.setProperty(
+      "--stag-ptr-rotation",
+      "0deg"
+    );
+
     indicator.setAttribute("aria-hidden", "true");
 
     if (label) {
@@ -352,7 +499,10 @@ function initPullToRefresh() {
           return;
         }
 
-        if (Math.abs(dx) <= 10 && Math.abs(dy) <= 10) {
+        if (
+          Math.abs(dx) <= 10 &&
+          Math.abs(dy) <= 10
+        ) {
           return;
         }
 
@@ -362,17 +512,25 @@ function initPullToRefresh() {
         }
 
         verticalPull = true;
+
         scene.classList.add("ptr-active");
+
         setHotspotSuppression();
       }
 
       event.preventDefault();
 
-      pullDistance = Math.min(maxPull, dy * 0.56);
+      pullDistance =
+        Math.min(maxPull, dy * 0.56);
 
-      const progress = Math.min(1, pullDistance / threshold);
-      const sceneY = pullDistance * 0.7;
-      const indicatorY = -68 + pullDistance * 0.82;
+      const progress =
+        Math.min(1, pullDistance / threshold);
+
+      const sceneY =
+        pullDistance * 0.7;
+
+      const indicatorY =
+        -68 + pullDistance * 0.82;
 
       scene.classList.remove("ptr-settling");
       scene.classList.add("ptr-pulling");
@@ -381,6 +539,7 @@ function initPullToRefresh() {
         `translate3d(0, ${sceneY}px, 0)`;
 
       indicator.classList.add("is-pulling");
+
       indicator.classList.toggle(
         "is-ready",
         pullDistance >= threshold
@@ -394,7 +553,10 @@ function initPullToRefresh() {
         Math.round(progress * 260) + "deg"
       );
 
-      indicator.setAttribute("aria-hidden", "false");
+      indicator.setAttribute(
+        "aria-hidden",
+        "false"
+      );
 
       if (label) {
         label.textContent =
@@ -407,36 +569,65 @@ function initPullToRefresh() {
   );
 
   function finishPull() {
-    if (!tracking || sceneState.refreshing) return;
+    if (
+      !tracking ||
+      sceneState.refreshing
+    ) {
+      return;
+    }
 
-    if (verticalPull && pullDistance >= threshold) {
+    if (
+      verticalPull &&
+      pullDistance >= threshold
+    ) {
       sceneState.refreshing = true;
       tracking = false;
 
       setHotspotSuppression(1500);
 
       scene.classList.remove("ptr-pulling");
-      scene.classList.add("ptr-settling", "ptr-active");
-      scene.style.transform = "translate3d(0, 42px, 0)";
 
-      indicator.classList.remove("is-pulling", "is-ready");
-      indicator.classList.add("is-refreshing");
-      indicator.style.transform = "translate3d(-50%, 10px, 0)";
-      indicator.setAttribute("aria-hidden", "false");
+      scene.classList.add(
+        "ptr-settling",
+        "ptr-active"
+      );
+
+      scene.style.transform =
+        "translate3d(0, 42px, 0)";
+
+      indicator.classList.remove(
+        "is-pulling",
+        "is-ready"
+      );
+
+      indicator.classList.add(
+        "is-refreshing"
+      );
+
+      indicator.style.transform =
+        "translate3d(-50%, 10px, 0)";
+
+      indicator.setAttribute(
+        "aria-hidden",
+        "false"
+      );
 
       if (label) {
         label.textContent = "Refreshing";
       }
 
       window.setTimeout(() => {
-        const url = new URL(window.location.href);
+        const url =
+          new URL(window.location.href);
 
         url.searchParams.set(
           CACHE_PARAM,
           Date.now().toString(36)
         );
 
-        window.location.replace(url.toString());
+        window.location.replace(
+          url.toString()
+        );
       }, 220);
 
       return;
@@ -483,17 +674,22 @@ if (document.readyState === "loading") {
   );
 } else {
   /*
-   * Critical for cache-busted dynamic script loading:
-   * DOMContentLoaded may already have happened before script.js arrives.
+   * Dynamic cache-busted script loading can finish after
+   * DOMContentLoaded, so startup must also work immediately.
    */
   startStagLore();
 }
 
-if (typeof PORTRAIT_MEDIA.addEventListener === "function") {
+if (
+  typeof PORTRAIT_MEDIA.addEventListener ===
+  "function"
+) {
   PORTRAIT_MEDIA.addEventListener(
     "change",
     handleArtworkModeChange
   );
 } else {
-  PORTRAIT_MEDIA.addListener(handleArtworkModeChange);
+  PORTRAIT_MEDIA.addListener(
+    handleArtworkModeChange
+  );
 }
