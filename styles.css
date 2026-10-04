@@ -158,6 +158,27 @@ body {
   pointer-events: none;
 }
 
+.hotspot-picture {
+  display: block;
+  width: 100%;
+  height: auto;
+
+  transform:
+    rotate(var(--visual-rotate, 0deg))
+    scale(
+      var(--visual-scale-x, 1),
+      var(--visual-scale-y, 1)
+    );
+  transform-origin: center;
+
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    opacity 150ms ease;
+
+  pointer-events: none;
+}
+
 .hotspot img {
   display: block;
   width: 100%;
@@ -179,13 +200,60 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .hotspot:hover {
-    transform: translate(-50%, -50%) scale(1.05);
+    transform: translate(-50%, -50%) scale(1.035);
+  }
+
+  .hotspot:hover .hotspot-picture {
+    filter:
+      brightness(1.10)
+      drop-shadow(0 0 10px rgba(223, 184, 104, 0.28));
   }
 }
 
+.hotspot:active {
+  transform: translate(-50%, -50%) scale(0.975);
+}
+
+.hotspot:active .hotspot-picture {
+  filter:
+    brightness(1.13)
+    drop-shadow(0 0 12px rgba(223, 184, 104, 0.34));
+}
+
+/*
+ * Portrait visual profiles.
+ *
+ * These only affect the rendered cutout artwork. Position and hit-area
+ * coordinates remain controlled independently by BUTTON_LAYOUT in JS.
+ * This lets us match the mobile study without disturbing landscape.
+ */
 @media (orientation: portrait) {
   .hotspot {
     width: var(--size, var(--hotspot-size-portrait));
+  }
+
+  .hotspot-book {
+    --visual-rotate: 0deg;
+    --visual-scale-x: 1;
+    --visual-scale-y: 1;
+  }
+
+  .hotspot-skull {
+    --visual-rotate: 0deg;
+    --visual-scale-x: 1;
+    --visual-scale-y: 1;
+  }
+
+  .hotspot-scroll {
+    --visual-rotate: 0deg;
+    --visual-scale-x: 1;
+    --visual-scale-y: 1;
+  }
+
+  .hotspot-beaker {
+    --visual-rotate: 0deg;
+    --visual-scale-x: 1;
+    --visual-scale-y: 1;
   }
 }
 
