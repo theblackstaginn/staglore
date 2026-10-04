@@ -59,7 +59,7 @@ body {
   overflow: hidden;
   background: #050608;
 
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 .scene {
@@ -116,7 +116,7 @@ body {
   top: var(--y, 50%);
 
   width: var(--size, var(--hotspot-size-landscape));
-  aspect-ratio: 1 / 1;
+  height: auto;
 
   padding: 0;
   border: 0;
@@ -128,6 +128,8 @@ body {
 
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  line-height: 0;
 
   opacity: 1;
   transition:
@@ -152,7 +154,7 @@ body {
 .hotspot img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
 
   object-fit: contain;
   pointer-events: none;
