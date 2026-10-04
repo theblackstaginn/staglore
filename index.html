@@ -7,8 +7,19 @@
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   />
   <title>Stag Lore – Study</title>
-  <!-- IMPORTANT: this must match the filename exactly -->
-  <link rel="stylesheet" href="styles.css" />
+  <script>
+    (() => {
+      const cacheKey = new URLSearchParams(window.location.search).get("_cb") || "";
+      window.__STAG_LORE_CACHE_BUST__ = cacheKey;
+
+      const stylesheet = document.createElement("link");
+      stylesheet.id = "site-styles";
+      stylesheet.rel = "stylesheet";
+      stylesheet.href = "styles.css" + (cacheKey ? "?v=" + encodeURIComponent(cacheKey) : "");
+      document.head.appendChild(stylesheet);
+    })();
+  </script>
+  <noscript><link rel="stylesheet" href="styles.css" /></noscript>
 </head>
 <body>
 
@@ -47,7 +58,13 @@
     </div>
   </main>
 
-  <!-- ONE script file; again, filename must match exactly -->
-  <script src="script.js"></script>
+  <script>
+    (() => {
+      const cacheKey = window.__STAG_LORE_CACHE_BUST__ || "";
+      const script = document.createElement("script");
+      script.src = "script.js" + (cacheKey ? "?v=" + encodeURIComponent(cacheKey) : "");
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
