@@ -170,7 +170,7 @@ function markSceneSwitching() {
 
   sceneState.ready = false;
 
-  scene.classList.remove("is-ready");
+  scene.classList.remove("is-ready", "is-sized");
   scene.classList.add("is-switching");
   scene.removeAttribute("data-error");
 }
@@ -200,7 +200,11 @@ function markSceneError(kind = "asset") {
 
   sceneState.ready = false;
 
-  scene.classList.remove("is-ready", "is-switching");
+  scene.classList.remove(
+    "is-ready",
+    "is-sized",
+    "is-switching"
+  );
   scene.dataset.error = kind;
 }
 
@@ -213,7 +217,12 @@ function wait(milliseconds) {
 async function waitForExpectedArtwork(bg, mode, epoch) {
   const expected = expectedArtworkFile(mode);
 
-  for (let attempt = 0; attempt < 120; attempt += 1) {
+  /*
+   * Heavy source images are intentional for now. Give a genuinely slow
+   * mobile connection time to finish instead of declaring the scene dead
+   * after only a few seconds.
+   */
+  for (let attempt = 0; attempt < 1200; attempt += 1) {
     if (epoch !== sceneState.layoutEpoch) {
       return false;
     }
@@ -233,8 +242,13 @@ async function waitForExpectedArtwork(bg, mode, epoch) {
 }
 
 function waitForImageLoad(img) {
-  if (img.complete && img.naturalWidth > 0) {
-    return Promise.resolve(true);
+  /*
+   * complete=true with naturalWidth=0 means the image already failed.
+   * Resolve false immediately or the promise would wait forever for an
+   * error event that already happened.
+   */
+  if (img.complete) {
+    return Promise.resolve(img.naturalWidth > 0);
   }
 
   return new Promise((resolve) => {
@@ -266,6 +280,37 @@ async function decodeImage(img) {
   } catch {
     // A load event is enough to keep the scene functional.
   }
+}
+
+function setSceneGeometryFromArtwork(bg) {
+  const scene = document.getElementById("scene");
+
+  if (
+    !scene ||
+    !bg ||
+    !bg.naturalWidth ||
+    !bg.naturalHeight
+  ) {
+    return false;
+  }
+
+  const width = bg.naturalWidth;
+  const height = bg.naturalHeight;
+  const ratio = width / height;
+
+  scene.style.setProperty(
+    "--scene-ratio",
+    String(ratio)
+  );
+
+  scene.style.setProperty(
+    "--scene-aspect",
+    width + " / " + height
+  );
+
+  scene.classList.add("is-sized");
+
+  return true;
 }
 
 async function settleSceneForCurrentMode() {
@@ -309,6 +354,25 @@ async function settleSceneForCurrentMode() {
   }
 
   await Promise.all(images.map(decodeImage));
+
+  if (epoch !== sceneState.layoutEpoch) {
+    return;
+  }
+
+  if (!setSceneGeometryFromArtwork(bg)) {
+    markSceneError("geometry");
+    return;
+  }
+
+  /*
+   * Allow Safari one layout frame to apply the measured aspect ratio
+   * before the hotspots become visible and interactive.
+   */
+  await new Promise((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(resolve);
+    });
+  });
 
   if (epoch !== sceneState.layoutEpoch) {
     return;
