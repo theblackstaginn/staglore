@@ -1,13 +1,17 @@
 :root {
-  /* max width for desktop; tweak if you like */
   --scene-max-width: 1400px;
 
-  /* default hotspot sizes (% of scene width) */
+  /*
+   * JS replaces these with the natural dimensions of the artwork.
+   * They only exist as a no-flash fallback during the first image load.
+   */
+  --scene-ratio: 1.7777778;
+  --scene-aspect: 16 / 9;
+
   --hotspot-size-desktop: 14%;
   --hotspot-size-mobile: 18%;
 }
 
-/* Reset-ish */
 *,
 *::before,
 *::after {
@@ -16,77 +20,139 @@
 
 html,
 body {
+  width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  height: 100%;
+}
+
+html {
+  background: #050608;
 }
 
 body {
+  min-height: 100dvh;
+  overflow: hidden;
   background: #050608;
   color: #f4f1ea;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
 }
 
-/* ===== Scene container ===== */
+/* =========================================================
+   SCENE GEOMETRY
+
+   The scene box always uses the natural aspect ratio of the
+   selected artwork. The art and hotspots therefore share one
+   coordinate space and can no longer drift apart from cropping.
+   ========================================================= */
 
 .scene-shell {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #050608;
 }
 
 .scene {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  max-width: var(--scene-max-width);
+
+  /*
+   * Width is constrained by BOTH viewport width and viewport height.
+   * The second limit prevents a landscape scene from becoming taller
+   * than the device while preserving the artwork's exact proportions.
+   */
+  width: min(
+    100vw,
+    var(--scene-max-width),
+    calc(100dvh * var(--scene-ratio))
+  );
+  aspect-ratio: var(--scene-aspect);
+
+  flex: 0 0 auto;
   margin: 0 auto;
   overflow: hidden;
+  background: #050608;
+}
+
+.scene-picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .scene-bg {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-/* ===== Hotspot buttons ===== */
+/* =========================================================
+   HOTSPOTS
+   Percentages are now percentages of the ARTWORK itself.
+   ========================================================= */
 
 .hotspot {
   position: absolute;
-  transform: translate(-50%, -50%);
-  border: none;
-  padding: 0;
-  background: none;
-  cursor: pointer;
-
-  /* these are set from JS per-button */
   left: var(--x, 50%);
   top: var(--y, 50%);
   width: var(--size, var(--hotspot-size-desktop));
   aspect-ratio: 1 / 1;
+
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hotspot img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  pointer-events: none; /* clicks go to the button, not the img */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-/* Hover on desktop */
+.hotspot:focus-visible {
+  outline: 2px solid rgba(232, 203, 145, 0.9);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .hotspot:hover {
     transform: translate(-50%, -50%) scale(1.05);
   }
 }
 
-/* Slightly bigger targets on mobile */
 @media (max-width: 768px) {
   .hotspot {
     width: var(--size, var(--hotspot-size-mobile));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot {
+    transition: none;
   }
 }
