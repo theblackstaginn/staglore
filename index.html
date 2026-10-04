@@ -28,7 +28,7 @@
       <!-- The browser selects the correct artwork before layout. -->
       <picture class="scene-picture">
         <source
-          media="(max-width: 768px)"
+          media="(orientation: portrait)"
           srcset="./lore-assets/stag-study-mobile.png"
         />
         <img
@@ -36,23 +36,26 @@
           class="scene-bg"
           src="./lore-assets/stag-study.png"
           alt="The Black Stag study"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
         />
       </picture>
 
       <!-- Hotspot buttons (each has its own ID) -->
-      <button class="hotspot" id="btn-book" aria-label="Book">
+      <button class="hotspot" id="btn-book" type="button" aria-label="Book">
         <img src="./lore-assets/book-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-skull" aria-label="Skull">
+      <button class="hotspot" id="btn-skull" type="button" aria-label="Skull">
         <img src="./lore-assets/skull-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-scroll" aria-label="Scroll">
+      <button class="hotspot" id="btn-scroll" type="button" aria-label="Scroll">
         <img src="./lore-assets/scroll-button.png" alt="" />
       </button>
 
-      <button class="hotspot" id="btn-beaker" aria-label="Beaker">
+      <button class="hotspot" id="btn-beaker" type="button" aria-label="Beaker">
         <img src="./lore-assets/beaker-button.png" alt="" />
       </button>
     </div>
@@ -62,6 +65,7 @@
     (() => {
       const cacheKey = window.__STAG_LORE_CACHE_BUST__ || "";
       const script = document.createElement("script");
+      script.async = false;
       script.src = "script.js" + (cacheKey ? "?v=" + encodeURIComponent(cacheKey) : "");
       document.body.appendChild(script);
     })();
