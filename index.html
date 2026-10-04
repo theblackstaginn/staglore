@@ -14,13 +14,19 @@
 
   <main class="scene-shell">
     <div id="scene" class="scene">
-      <!-- Background image (JS will swap to mobile version if needed) -->
-      <img
-        id="scene-bg"
-        class="scene-bg"
-        src="./lore-assets/stag-study.png"
-        alt="Stag study background"
-      />
+      <!-- The browser selects the correct artwork before layout. -->
+      <picture class="scene-picture">
+        <source
+          media="(max-width: 768px)"
+          srcset="./lore-assets/stag-study-mobile.png"
+        />
+        <img
+          id="scene-bg"
+          class="scene-bg"
+          src="./lore-assets/stag-study.png"
+          alt="The Black Stag study"
+        />
+      </picture>
 
       <!-- Hotspot buttons (each has its own ID) -->
       <button class="hotspot" id="btn-book" aria-label="Book">
